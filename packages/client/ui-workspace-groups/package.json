@@ -73,14 +73,15 @@
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "4.0.5-alpha.1",
-    "@deepseek-ai/dsh-api-remotes": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-agent": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-api-remotes": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-api-session-controller": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-api-workspace-controller": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-client-connection": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-client-locale": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-client-product-analytics": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-client-shortcuts": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-client-store": "0.2.1-alpha.2",
-    "@deepseek-ai/dsh-client-test-runtime": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-client-ui-conversation": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-client-ui-layout": "0.2.1-alpha.2",
     "@deepseek-ai/dsh-client-ui-primitives": "0.2.1-alpha.2",
@@ -97,11 +98,14 @@
     "@deepseek-ai/dsh-util-workspace-path": "0.2.1-alpha.2",
     "@types/react": "~18.3.1",
     "clsx": "^2.0.0",
-    "react": "^18.2.0",
-    "@deepseek-ai/dsh-client-shortcuts": "0.2.1-alpha.2",
-    "@deepseek-ai/dsh-client-product-analytics": "0.2.1-alpha.2"
+    "react": "^18.2.0"
   },
   "files": [
+    "README.md",
+    "README.zh.md",
+    "README.i18n.yaml",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
     "lib/index.js",
     "lib/client.js",
     "lib/types/**/*.d.ts"

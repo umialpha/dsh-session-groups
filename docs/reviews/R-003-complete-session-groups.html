@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>R-003 完整置顶分组 MR Gate</title>
+  <meta name="review:id" content="R-003">
+  <meta name="review:status" content="resolved">
+  <meta name="review:ticket" content="T-002">
+  <meta name="review:design" content="D-001">
+  <meta name="review:created" content="2026-10-10">
+  <meta name="review:updated" content="2026-10-10">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <p class="eyebrow">Review</p>
+      <h1>R-003 完整置顶分组 MR Gate</h1>
+      <p class="summary">状态：resolved / Gate：MR Gate / Ticket：<a href="../../tickets/T-002-complete-session-groups.html">T-002</a></p>
+    </header>
+    <section>
+      <h2>评审对象</h2>
+      <p><code>b9bebf1..工作树</code>：完整置顶分组 UI、持久化控制器、跨项目拖放、Session 操作适配、发布材料与安装 smoke。</p>
+    </section>
+    <section>
+      <h2>关联设计与既有评审</h2>
+      <p><a href="../designs/D-001-workspace-replacement.html">D-001</a>；Doc Gate：<a href="R-001-workspace-replacement.html">R-001</a>；First Slice：<a href="R-002-installable-slice.html">R-002</a>。</p>
+    </section>
+    <section>
+      <h2>Round 1（full）</h2>
+      <p><strong>ARCH：SOUND</strong></p>
+      <p><strong>Verdict：FIX THEN VERIFY</strong></p>
+      <ul>
+        <li><strong>Major — Workspace 回归 suite 未执行：</strong><code>pnpm test</code> 有 9 个 Workspace suite 在收集阶段因发布包测试环境差异失败，无法作为“官方 Workspace 行为不变”的证据。</li>
+        <li><strong>Major — reconnect refresh 可能丢失：</strong><code>connection/reset</code> 在布局 mutation 进行时触发 <code>refresh()</code> 会得到 <code>busy</code>，未知提交结果可能一直保留旧快照。</li>
+        <li><strong>Minor — panel active 选中态：</strong>右侧或全局 panel 激活时，置顶区仍可能保留主 Session 高亮。</li>
+        <li><strong>Minor — Modal IME 状态：</strong>创建和重命名对话框共用 composing ref，composition 中关闭后可能影响下一个 Modal 的 Enter。</li>
+        <li><strong>Structural / Critical / Nit：</strong>无。</li>
+      </ul>
+      <h3>作者响应</h3>
+      <ul>
+        <li><strong>Fix Major 1：</strong>在独立仓库增加不依赖 DSH checkout 的 source-plane 测试 adapter，使镜像 Workspace suite 真正收集并执行。</li>
+        <li><strong>Fix Major 2：</strong>把 mutation 期间的权威刷新排队，在 mutation settle 后执行，并增加 reconnect-during-mutation 测试。</li>
+        <li><strong>Fix 两个 Minor：</strong>改动局部且直接影响原生一致性和输入可靠性，一并补测试。</li>
+      </ul>
+      <p><strong>下一步：验证轮</strong> — 两个阻断项均可局部修复，不改变已批准的模块边界、数据模型或主流程；修复后由 fresh reviewer 只核验四项 finding 与相关回归。</p>
+    </section>
+    <section>
+      <h2>Round 2（verification）</h2>
+      <p><strong>ARCH：SOUND</strong></p>
+      <p><strong>Verdict：PASS</strong></p>
+      <ul>
+        <li><strong>Resolved — Workspace 回归 suite：</strong>独立仓库的 source-plane 测试 adapter 已让镜像 Workspace suite 正常收集并执行；12 files / 434 tests 通过，完整 <code>pnpm test</code> 为 24 files / 528 tests 通过。</li>
+        <li><strong>Resolved — reconnect refresh：</strong>mutation 期间到达的权威刷新会排队到 mutation settle 后执行；拒绝提交和未知提交结果均有 reconnect-during-mutation 测试覆盖。</li>
+        <li><strong>Resolved — panel active 选中态：</strong>右侧或全局 panel 激活时，置顶行不再保留主 Session 高亮，相关组件回归测试通过。</li>
+        <li><strong>Resolved — Modal IME 状态：</strong>创建与重命名对话框各自重置 composition 状态，关闭后不会影响下一次打开或另一个 Modal 的 Enter，相关组件回归测试通过。</li>
+        <li><strong>Critical / Structural：</strong>无。</li>
+      </ul>
+      <h3>作者响应</h3>
+      <p><strong>Accept：</strong>Round 1 的四项 finding 均已解决；修复保持在既有测试适配、控制器和组件责任内，没有改变已批准的包边界、存储模型或主流程。</p>
+      <p><strong>下一步：通过</strong> — 验证轮确认全部阻断项关闭且相关区域无回归，MR Gate 状态改为 <code>resolved</code>。</p>
+    </section>
+  </main>
+</body>
+</html>

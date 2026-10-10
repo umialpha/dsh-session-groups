@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>T-002 完整置顶分组与拖放体验</title>
   <meta name="ticket:id" content="T-002">
-  <meta name="ticket:status" content="doing">
+  <meta name="ticket:status" content="review">
   <meta name="ticket:priority" content="P1">
   <meta name="ticket:type" content="feature">
   <meta name="ticket:level" content="L">
@@ -18,7 +18,7 @@
     <header class="page-header">
       <p class="eyebrow">Ticket</p>
       <h1>T-002 完整置顶分组与拖放体验</h1>
-      <p class="summary">状态：doing / 优先级：P1 / 类型：feature / 分级：L — 完成持久化 CRUD、跨模块拖放、原生 Session 操作适配与发布交付。</p>
+      <p class="summary">状态：review / 优先级：P1 / 类型：feature / 分级：L — 完成持久化 CRUD、跨模块拖放、原生 Session 操作适配与发布交付。</p>
     </header>
     <section>
       <h2>目标</h2>
@@ -41,15 +41,26 @@
     </section>
     <section>
       <h2>下一步</h2>
-      <p>移植完整 UI 到社区包名，先修正 D-001 已识别的 blank、open、fork、archive 与 rename 语义，再运行 focused tests、build、install smoke 和浏览器验收。</p>
+      <p>等待用户在已启动的安装版 Web 中完成视觉与交互验收；明确接受后再把 ticket 标记为 <code>done</code>。</p>
     </section>
     <section>
       <h2>验证</h2>
-      <ul><li>待记录 UI focused tests、typecheck、build、pack/install smoke 与浏览器验收。</li></ul>
+      <ul>
+        <li><code>pnpm test</code>：24 files / 528 tests 通过；其中 Workspace 镜像 12 files / 434 tests、Session Groups UI 7 files / 60 tests 通过。</li>
+        <li><code>pnpm run typecheck</code>：通过。</li>
+        <li><code>pnpm run lint</code>：通过；仅保留 3 个上游 Workspace 镜像 warning。</li>
+        <li><code>pnpm run build</code>：Host 与 Client 构建通过。</li>
+        <li><code>node tests/install/session-groups.smoke.mjs --dsh-cli /tmp/dsh-session-groups-smoke.sDb06f/node_modules/.bin/dsh</code>：四包 pack、干净安装、Web 启动、bundle 移除和官方 Workspace 恢复通过。</li>
+        <li>安装版浏览器检查：创建“工作”和“个人兴趣”分组后刷新，分组仍保留；浏览器 console 无 error 或 warning。</li>
+        <li><a href="../docs/reviews/R-003-complete-session-groups.html">R-003</a>：Round 2 验证轮为 <code>ARCH: SOUND / PASS</code>，Round 1 四项 finding 全部解决。</li>
+      </ul>
     </section>
     <section>
       <h2>记录</h2>
-      <ul><li>2026-10-10：R-002 通过后创建，开始完整实现。</li></ul>
+      <ul>
+        <li>2026-10-10：R-002 通过后创建，开始完整实现。</li>
+        <li>2026-10-10：完成完整分组 UI、持久化、拖放、原生 Session 操作适配、发布材料和安装 smoke；R-003 MR Gate 通过，状态改为 review，等待用户视觉与交互验收。</li>
+      </ul>
     </section>
   </main>
 </body>

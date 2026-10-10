@@ -36,11 +36,11 @@
 
 ### 命令
 
-- 安装：`TODO`（创建 package manifest 后补充）。
-- 构建：`TODO`（创建 package scripts 后补充）。
-- 测试：`TODO`（创建测试配置后补充）。
-- Lint：`TODO`（创建 lint 配置后补充）。
-- Typecheck：`TODO`（创建 TypeScript 配置后补充）。
+- 安装：`pnpm install`。
+- 构建：`pnpm run build`。
+- 测试：`pnpm test`；分组 UI 定向测试使用 `pnpm exec vitest run packages/client/ui-session-groups/tests`。
+- Lint：`pnpm run lint`。
+- Typecheck：`pnpm run typecheck`。
 - 本地运行：必须通过 `dsh` profile 启动，具体命令在实现 ticket 中验证后补充。
 
 ### 目录

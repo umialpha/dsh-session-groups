@@ -48,6 +48,11 @@
     "bundle": "tsdown --config-loader native"
   },
   "files": [
+    "README.md",
+    "README.zh.md",
+    "README.i18n.yaml",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
     "lib/index.js",
     "lib/client.js",
     "lib/types/**/*.js",

@@ -29,9 +29,13 @@ function standardDecoratorPlugin() {
 
 export default defineConfig({
   plugins: [standardDecoratorPlugin()],
+  ssr: {
+    noExternal: ['@deepseek-ai/dsh-client-ui-primitives'],
+  },
   test: {
     clearMocks: true,
     execArgv: process.allowedNodeEnvironmentFlags.has('--webstorage') ? ['--no-webstorage'] : [],
+    setupFiles: ['./tests/setup-dom.ts'],
     include: [
       'build/**/*.spec.ts',
       'packages/*/*/tests/**/*.spec.{ts,tsx}',

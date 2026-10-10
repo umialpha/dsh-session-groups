@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.base.host.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rewriteRelativeImportExtensions": false
+  },
+  "include": [
+    "build/**/*.ts",
+    "tsdown.config.ts",
+    "vitest.config.ts"
+  ],
+  "references": [
+    {
+      "path": "./packages/session/session-group-registry/tsconfig.host.json"
+    },
+    {
+      "path": "./packages/bundle/session-groups"
+    }
+  ]
+}

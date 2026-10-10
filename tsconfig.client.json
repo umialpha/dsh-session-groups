@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.base.client.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rewriteRelativeImportExtensions": false
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/session/session-group-registry/tsconfig.client.json"
+    },
+    {
+      "path": "./packages/client/ui-workspace-groups"
+    },
+    {
+      "path": "./packages/client/ui-session-groups"
+    }
+  ]
+}

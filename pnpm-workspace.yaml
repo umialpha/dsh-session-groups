@@ -1,0 +1,11 @@
+packages:
+  - packages/*/*
+
+# These optional/native lifecycle scripts arrive only through DSH test tooling.
+# This plugin's build and focused tests do not execute those runtimes.
+allowBuilds:
+  '@deepseek-ai/dsh-subprocess-local': false
+  '@google/genai': false
+  koffi: false
+  node-pty: false
+  protobufjs: false

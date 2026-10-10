@@ -1,0 +1,55 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/session/session-group-registry/README.md
+/:
+  en: ceb96011f60ae172
+  zh: a07297e2220286e1
+/deepseek-ai-dsh-session-group-registry:
+  en: 56908b400efe42c2
+  zh: a88f81a6f782e53c
+/deepseek-ai-dsh-session-group-registry/summary:
+  en: 6cf332e93272f5e5
+  zh: 3ffdc90367db3a8a
+/deepseek-ai-dsh-session-group-registry/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-session-group-registry/use-this-package:
+  en: a5b1c0a5adabe949
+  zh: ce0392de3fe12a4e
+/deepseek-ai-dsh-session-group-registry/use-this-package/when-to-choose-it:
+  en: 27325d99ec7b5921
+  zh: 84d3ba3f21adf746
+/deepseek-ai-dsh-session-group-registry/use-this-package/minimal-configuration:
+  en: 3a1e48660404005c
+  zh: 0dfef7778eb1f018
+/deepseek-ai-dsh-session-group-registry/use-this-package/manage-pinned-layout:
+  en: 8d57b4de2ec5ca4c
+  zh: ab23d6172886bee1
+/deepseek-ai-dsh-session-group-registry/understand-the-implementation:
+  en: 593eaa94f844e9ed
+  zh: 9b4694f84fd49ee0
+/deepseek-ai-dsh-session-group-registry/further-exploration:
+  en: 0fe0899231a3bc28
+  zh: 98209aabcf74876f
+/deepseek-ai-dsh-session-group-registry/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-session-group-registry/model-experience/pinned-session-layout:
+  en: 165d07cea01722f4
+  zh: 81d3c5f2fd914253
+/deepseek-ai-dsh-session-group-registry/model-experience/pinned-session-layout/what-the-model-sees:
+  en: f2fd82771e441dfb
+  zh: c15079b74f640e3e
+/deepseek-ai-dsh-session-group-registry/model-experience/pinned-session-layout/token-effect:
+  en: edfaa4db8b0ade18
+  zh: 5194e9a001bd13a9
+/deepseek-ai-dsh-session-group-registry/model-experience/pinned-session-layout/kv-cache-effect:
+  en: 09ba881820f9633b
+  zh: d8cd240c3e38fc3f
+/deepseek-ai-dsh-session-group-registry/known-limitations-and-deferred-work:
+  en: b72243a493792b86
+  zh: e71b8cc92589ce21
+/deepseek-ai-dsh-session-group-registry/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: 9c6918ce849f6c93

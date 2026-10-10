@@ -1,0 +1,54 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": [
+      "ES2024",
+      "ESNext.Disposable"
+    ],
+    "composite": true,
+    "incremental": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "verbatimModuleSyntax": false,
+    "paths": {
+      "@umialpha/dsh-client-ui-workspace-groups": [
+        "./packages/client/ui-workspace-groups/src/index.ts"
+      ],
+      "@umialpha/dsh-client-ui-workspace-groups/client": [
+        "./packages/client/ui-workspace-groups/src/client/index.ts"
+      ],
+      "@umialpha/dsh-session-group-registry": [
+        "./packages/session/session-group-registry/src/index.ts"
+      ],
+      "@umialpha/dsh-session-group-registry/types": [
+        "./packages/session/session-group-registry/lib/types/types.d.ts"
+      ],
+      "@umialpha/dsh-session-group-registry/remote": [
+        "./packages/session/session-group-registry/lib/typert.remote-client.d.ts"
+      ],
+      "@umialpha/dsh-client-ui-session-groups": [
+        "./packages/client/ui-session-groups/src/index.ts"
+      ],
+      "@umialpha/dsh-client-ui-session-groups/client": [
+        "./packages/client/ui-session-groups/src/client/index.ts"
+      ],
+      "@umialpha/dsh-session-groups": [
+        "./packages/bundle/session-groups/src/index.ts"
+      ]
+    }
+  }
+}

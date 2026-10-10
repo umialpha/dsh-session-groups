@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>T-001 可安装的 Workspace 替换纵向切片</title>
   <meta name="ticket:id" content="T-001">
-  <meta name="ticket:status" content="doing">
+  <meta name="ticket:status" content="done">
   <meta name="ticket:priority" content="P1">
   <meta name="ticket:type" content="feature">
   <meta name="ticket:level" content="L">
@@ -18,7 +18,7 @@
     <header class="page-header">
       <p class="eyebrow">Ticket</p>
       <h1>T-001 可安装的 Workspace 替换纵向切片</h1>
-      <p class="summary">状态：doing / 优先级：P1 / 类型：feature / 分级：L — 跨四包、Host/Client Remote、动态入口与 profile 替换恢复链路。</p>
+      <p class="summary">状态：done / 优先级：P1 / 类型：feature / 分级：L — 跨四包、Host/Client Remote、动态入口与 profile 替换恢复链路。</p>
     </header>
 
     <section>
@@ -50,13 +50,17 @@
 
     <section>
       <h2>下一步</h2>
-      <p>建立独立 workspace 和四包最小真实实现，构建 tarball 后在干净 DSH profile 执行安装、激活与恢复 smoke。</p>
+      <p>已完成；完整分组 UI、行为与发布材料由 <a href="T-002-complete-session-groups.html">T-002</a> 继续。</p>
     </section>
 
     <section>
       <h2>验证</h2>
       <ul>
-        <li>待记录 typecheck、unit、build、pack、clean-profile install/activate/recover 命令及结果。</li>
+        <li><code>pnpm run typecheck</code>：通过。</li>
+        <li><code>pnpm exec vitest run ...</code>：Registry、Workspace fork 与 bundle 共 7 files / 118 tests 通过。</li>
+        <li><code>pnpm run build</code>：Host、Client 与 Typert Remote 产物构建通过。</li>
+        <li><code>node tests/install/session-groups.smoke.mjs --dsh-cli /tmp/dsh-session-groups-smoke.sDb06f/node_modules/.bin/dsh</code>：四包 pack、干净 DSH <code>0.2.1-alpha.2</code> 安装、Web 启动、bundle 移除和官方 Workspace 恢复通过。</li>
+        <li><a href="../docs/reviews/R-002-installable-slice.html">R-002</a>：<code>ARCH: SOUND / PASS</code>，无阻断项。</li>
       </ul>
     </section>
 
@@ -64,6 +68,7 @@
       <h2>记录</h2>
       <ul>
         <li>2026-10-10：Doc Gate 通过后创建 ticket，开始 First Slice。</li>
+        <li>2026-10-10：完成 typecheck、118 项定向测试、build、pack 与干净 profile 安装恢复 smoke；First Slice architecture review 通过，状态改为 done。</li>
       </ul>
     </section>
   </main>

@@ -1,0 +1,17 @@
+# Replace the version-matched Workspace browser and add the Host-backed Pinned area.
+
+- id: ui-workspace
+  name: '@deepseek-ai/dsh-client-ui-workspace'
+  disabled: true
+
+- insert:
+    - id: session-group-registry
+      name: '@umialpha/dsh-session-group-registry'
+      config:
+        maxTitleBytes: 80
+
+    - id: ui-workspace-groups
+      name: '@umialpha/dsh-client-ui-workspace-groups'
+
+    - id: ui-session-groups
+      name: '@umialpha/dsh-client-ui-session-groups'

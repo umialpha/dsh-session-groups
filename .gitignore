@@ -1,0 +1,11 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
+*.tgz
+*.tsbuildinfo
+.pnpm-store/
+coverage/
+node_modules/
+packages/*/*/lib/

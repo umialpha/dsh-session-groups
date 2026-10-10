@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>T-002 完整置顶分组与拖放体验</title>
+  <meta name="ticket:id" content="T-002">
+  <meta name="ticket:status" content="doing">
+  <meta name="ticket:priority" content="P1">
+  <meta name="ticket:type" content="feature">
+  <meta name="ticket:level" content="L">
+  <meta name="ticket:created" content="2026-10-10">
+  <meta name="ticket:updated" content="2026-10-10">
+  <link rel="stylesheet" href="../docs/assets/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <p class="eyebrow">Ticket</p>
+      <h1>T-002 完整置顶分组与拖放体验</h1>
+      <p class="summary">状态：doing / 优先级：P1 / 类型：feature / 分级：L — 完成持久化 CRUD、跨模块拖放、原生 Session 操作适配与发布交付。</p>
+    </header>
+    <section>
+      <h2>目标</h2>
+      <p>在已通过 R-002 的独立安装链路上实现完整置顶区域：默认层、自定义分组、折叠与排序、跨项目 Session 拖放、自动置顶、重启持久化和原生 Session 操作。</p>
+    </section>
+    <section>
+      <h2>验收标准</h2>
+      <ul>
+        <li>项目树上方直接显示置顶默认层和命名分组，不使用 tab，不显示“未分组”标签。</li>
+        <li>可创建、重命名、删除、折叠和排序分组；可在默认层、组内和组间拖动 Session。</li>
+        <li>可从任意项目拖入未置顶 Session，接受后自动置顶并保存目标位置。</li>
+        <li>blank Session 仅可打开，无菜单、时间和拖动；普通 Session 保持设计文档规定的原生操作语义。</li>
+        <li>刷新和重启后布局保留；打包安装、禁用恢复和浏览器视觉/交互验收通过。</li>
+        <li>根 README、LICENSE、THIRD_PARTY_NOTICES 与安装说明完整。</li>
+      </ul>
+    </section>
+    <section>
+      <h2>关联设计</h2>
+      <p><a href="../docs/designs/D-001-workspace-replacement.html">D-001 可安装的 Workspace 替代与置顶分组</a>；First Slice：<a href="../docs/reviews/R-002-installable-slice.html">R-002</a>。</p>
+    </section>
+    <section>
+      <h2>下一步</h2>
+      <p>移植完整 UI 到社区包名，先修正 D-001 已识别的 blank、open、fork、archive 与 rename 语义，再运行 focused tests、build、install smoke 和浏览器验收。</p>
+    </section>
+    <section>
+      <h2>验证</h2>
+      <ul><li>待记录 UI focused tests、typecheck、build、pack/install smoke 与浏览器验收。</li></ul>
+    </section>
+    <section>
+      <h2>记录</h2>
+      <ul><li>2026-10-10：R-002 通过后创建，开始完整实现。</li></ul>
+    </section>
+  </main>
+</body>
+</html>

@@ -104,6 +104,23 @@ const renderDirectoryFlowOnly: WorkspaceBrowserProps['renderSlot'] = (name: stri
     ? <div data-testid="directory-flow" />
     : null
 
+/** Sibling drop target exposing the Workspace-owned drag handoff. */
+const renderGroupsDropTarget = (name: string, owner: object) => {
+  if (name !== 'sidebar.workspaces.sessionGroups') return null
+  const groups = owner as WorkspaceSessionGroupsOwnerProps
+  return (
+    <section
+      data-testid="session-groups-drop"
+      data-session-id={groups.activeSessionDrag?.sessionId}
+      onDragOver={(event) => { event.preventDefault() }}
+      onDrop={(event) => {
+        event.preventDefault()
+        groups.activeSessionDrag?.claimDrop()
+      }}
+    />
+  )
+}
+
 function mount(overrides: Partial<WorkspaceBrowserProps> = {}) {
   const controls = createWorkspaceShortcutControls()
   const store = createWorkspaceViewStore().create()
@@ -762,25 +779,29 @@ describe('WorkspaceBrowser', () => {
     expect(rendered).toHaveBeenCalledWith('sidebar.workspaces.session.row.action', owner)
   })
 
-  it('renders the optional Session groups section only in the expanded grouped view', () => {
-    const renderSlot: WorkspaceBrowserProps['renderSlot'] = (name: string) =>
-      name === 'sidebar.workspaces.sessionGroups' ? <div data-testid="session-groups" /> : null
+  it('keeps Pinned before the Workspace header across grouping, search, and rail changes', () => {
     const b = mount({
-      renderSlot,
-      useWorkspaces: hook(workspaceState([workspace('alpha', [])])),
+      renderSlot: renderGroupsDropTarget,
+      useSessions: hook(sessionState([summary('one', 1)])),
+      useWorkspaces: hook(workspaceState([workspace('alpha', ['one'])])),
     })
-    const groups = screen.getByTestId('session-groups')
-    expect(groups.compareDocumentPosition(screen.getByText('alpha')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    const pinned = screen.getByTestId('session-groups-drop')
+    const header = screen.getByText('工作区').parentElement
+    expect(pinned.parentElement).toBe(header?.parentElement)
+    expect(pinned.nextElementSibling).toBe(header)
+
+    for (const groupBy of ['workspace-tree', 'flat', 'workspace'] as const) {
+      act(() => { b.store.actions.setGroupBy(groupBy) })
+      expect(screen.getByTestId('session-groups-drop')).toBe(pinned)
+    }
+    fireEvent.change(screen.getByPlaceholderText('搜索会话名称'), { target: { value: 'one' } })
+    expect(screen.getByRole('tree', { name: '搜索结果' })).toBeTruthy()
+    expect(screen.getByTestId('session-groups-drop')).toBe(pinned)
 
     rerender(b, { wide: false })
-    expect(screen.queryByTestId('session-groups')).toBeNull()
-
+    expect(screen.queryByTestId('session-groups-drop')).toBeNull()
     rerender(b, { wide: true })
-    act(() => { b.store.actions.setGroupBy('flat') })
-    expect(screen.queryByTestId('session-groups')).toBeNull()
-
-    act(() => { b.store.actions.setGroupBy('workspace') })
-    expect(screen.getByTestId('session-groups')).toBeTruthy()
+    expect(screen.getByTestId('session-groups-drop').parentElement).toBe(header?.parentElement)
   })
 
   it('shows five sessions by default and clears transient show-all when the Workspace collapses', () => {
@@ -1992,42 +2013,110 @@ describe('WorkspaceBrowser', () => {
     expect(b.store.getSnapshot().sessionOrderByAccount.alpha).toEqual(['two', 'one', 'three'])
   })
 
-  it('lets the optional groups section claim a Session drop without committing the built-in reorder', () => {
+  it.each(['workspace', 'workspace-tree', 'flat'] as const)(
+    'lets Pinned claim a %s Session drop without committing the source reorder', (groupBy) => {
+      createWorkspaceViewStore().create().actions.setGroupBy(groupBy)
+      const b = mount({
+        renderSlot: renderGroupsDropTarget,
+        useSessions: hook(sessionState([summary('one', 3), summary('two', 2), summary('three', 1)])),
+        useWorkspaces: hook(workspaceState([workspace('alpha', ['one', 'two', 'three'])])),
+      })
+      if (groupBy !== 'flat') fireEvent.click(screen.getByText('alpha'))
+      const source = screen.getByText('one').closest('[role="treeitem"]') as HTMLElement
+      const target = screen.getByText('three').closest('[role="treeitem"]') as HTMLElement
+      target.getBoundingClientRect = () => ({
+        top: 200, bottom: 234, left: 0, right: 200, width: 200, height: 34, x: 0, y: 200, toJSON: () => ({}),
+      })
+
+      fireEvent.dragStart(source, { dataTransfer: dragData() })
+      fireDrag(target, 'dragOver', 205)
+      const groups = screen.getByTestId('session-groups-drop')
+      expect(groups.dataset.sessionId).toBe('one')
+      fireEvent.drop(groups, { dataTransfer: dragData() })
+      expect(groups.dataset.sessionId).toBeUndefined()
+      fireEvent.dragEnd(source)
+
+      expect(b.store.getSnapshot().sessionOrderByAccount).toEqual({})
+    },
+  )
+
+  it.each(['workspace-tree', 'flat', 'search', 'rail', 'filter', 'order'] as const)(
+    'clears a project drag when entering %s and accepts a fresh drag afterward', (change) => {
+      const b = mount({
+        renderSlot: renderGroupsDropTarget,
+        useSessions: hook(sessionState([summary('one', 3), summary('two', 2), summary('three', 1)])),
+        useWorkspaces: hook(workspaceState([workspace('alpha', ['one', 'two', 'three'])])),
+      })
+      fireEvent.click(screen.getByText('alpha'))
+      const source = screen.getByText('one').closest('[role="treeitem"]') as HTMLElement
+      const target = screen.getByText('three').closest('[role="treeitem"]') as HTMLElement
+      fireEvent.dragStart(source, { dataTransfer: dragData() })
+      fireDrag(target, 'dragOver', 1)
+      expect(screen.getByTestId('session-groups-drop').dataset.sessionId).toBe('one')
+
+      if (change === 'search') {
+        fireEvent.change(screen.getByPlaceholderText('搜索会话名称'), { target: { value: 'one' } })
+      } else if (change === 'rail') {
+        rerender(b, { wide: false })
+      } else {
+        act(() => {
+          if (change === 'filter') b.store.actions.setArchivedFilter('show')
+          else if (change === 'order') b.store.actions.setOrderBy('updated', {})
+          else b.store.actions.setGroupBy(change)
+        })
+      }
+      if (change !== 'rail') expect(screen.getByTestId('session-groups-drop').dataset.sessionId).toBeUndefined()
+      fireEvent.dragEnd(source)
+      expect(b.store.getSnapshot().sessionOrderByAccount).toEqual({})
+
+      if (change === 'search') fireEvent.change(screen.getByPlaceholderText('搜索会话名称'), { target: { value: '' } })
+      if (change === 'rail') rerender(b, { wide: true })
+      if (change !== 'flat' && screen.queryByText('one') === null) fireEvent.click(screen.getByText('alpha'))
+      const nextSource = screen.getByText('one').closest('[role="treeitem"]') as HTMLElement
+      fireEvent.dragStart(nextSource, { dataTransfer: dragData() })
+      const pinned = screen.getByTestId('session-groups-drop')
+      expect(pinned.dataset.sessionId).toBe('one')
+      fireEvent.drop(pinned, { dataTransfer: dragData() })
+      fireEvent.dragEnd(nextSource)
+      expect(pinned.dataset.sessionId).toBeUndefined()
+      expect(b.store.getSnapshot().sessionOrderByAccount).toEqual({})
+    },
+  )
+
+  it('keeps a new flat drag when the previous tree source clears its handoff', () => {
+    const shares: WorkspaceSessionGroupsOwnerProps[] = []
     const renderSlot: WorkspaceBrowserProps['renderSlot'] = (name: string, owner: object) => {
-      if (name !== 'sidebar.workspaces.sessionGroups') return null
-      const groups = owner as WorkspaceSessionGroupsOwnerProps
-      return (
-        <div
-          data-testid="session-groups-drop"
-          data-session-id={groups.activeSessionDrag?.sessionId}
-          onDragOver={(event) => { event.preventDefault() }}
-          onDrop={(event) => {
-            event.preventDefault()
-            groups.activeSessionDrag?.claimDrop()
-          }}
-        />
-      )
+      if (name === 'sidebar.workspaces.sessionGroups') shares.push(owner as WorkspaceSessionGroupsOwnerProps)
+      return renderGroupsDropTarget(name, owner)
     }
     const b = mount({
       renderSlot,
-      useSessions: hook(sessionState([summary('one', 3), summary('two', 2), summary('three', 1)])),
-      useWorkspaces: hook(workspaceState([workspace('alpha', ['one', 'two', 'three'])])),
+      useSessions: hook(sessionState([summary('one', 2), summary('two', 1)])),
+      useWorkspaces: hook(workspaceState([workspace('alpha', ['one', 'two'])])),
     })
     fireEvent.click(screen.getByText('alpha'))
-    const source = screen.getByText('one').closest('[role="treeitem"]') as HTMLElement
-    const target = screen.getByText('three').closest('[role="treeitem"]') as HTMLElement
-    target.getBoundingClientRect = () => ({
-      top: 200, bottom: 234, left: 0, right: 200, width: 200, height: 34, x: 0, y: 200, toJSON: () => ({}),
-    })
+    fireEvent.dragStart(screen.getByText('one').closest('[role="treeitem"]') as HTMLElement, { dataTransfer: dragData() })
+    const previousClaim = shares.at(-1)?.activeSessionDrag?.claimDrop
+    if (previousClaim === undefined) throw new Error('The tree drag did not provide a claim callback')
+
+    act(() => { b.store.actions.setGroupBy('flat') })
+    const source = screen.getByText('two').closest('[role="treeitem"]') as HTMLElement
+    fireEvent.dragStart(source, { dataTransfer: dragData() })
+    const pinned = screen.getByTestId('session-groups-drop')
+    expect(pinned.dataset.sessionId).toBe('two')
+    act(previousClaim)
+    expect(pinned.dataset.sessionId).toBe('two')
+    fireEvent.dragEnd(source)
+    expect(pinned.dataset.sessionId).toBeUndefined()
 
     fireEvent.dragStart(source, { dataTransfer: dragData() })
-    fireDrag(target, 'dragOver', 205)
-    const groups = screen.getByTestId('session-groups-drop')
-    expect(groups.dataset.sessionId).toBe('one')
-    fireEvent.drop(groups, { dataTransfer: dragData() })
-    fireEvent.dragEnd(source)
-
-    expect(b.store.getSnapshot().sessionOrderByAccount.alpha).toBeUndefined()
+    act(() => { b.store.actions.setArchivedFilter('show') })
+    expect(pinned.dataset.sessionId).toBeUndefined()
+    fireEvent.dragStart(screen.getByText('two').closest('[role="treeitem"]') as HTMLElement, { dataTransfer: dragData() })
+    expect(pinned.dataset.sessionId).toBe('two')
+    act(() => { b.store.actions.setGroupBy('workspace') })
+    expect(pinned.dataset.sessionId).toBeUndefined()
+    expect(b.store.getSnapshot().sessionOrderByAccount).toEqual({})
   })
 
   it('drags a pinned row by moving its position in the complete Session sequence', () => {
@@ -2291,7 +2380,7 @@ describe('WorkspaceBrowser', () => {
     expect(b.store.getSnapshot().sessionOrderByAccount.alpha).toEqual(['two', 'one'])
   })
 
-  it('labels an unrenamed default Workspace in the reader’s language and every other title verbatim', () => {
+  it('shows every stored Workspace title verbatim, including an existing automatic directory', () => {
     const renameWorkspace = vi.fn(async () => {})
     mount({
       useWorkspaces: hook(workspaceState([
@@ -2300,19 +2389,15 @@ describe('WorkspaceBrowser', () => {
       ])),
       renameWorkspace,
     })
-    expect(screen.getByRole('button', { name: '工作区“默认工作区”的操作' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: '工作区“default-workspace”的操作' })).toBeTruthy()
     expect(screen.getByRole('button', { name: '工作区“default-workspace backup”的操作' })).toBeTruthy()
-    // The dialog edits the text on screen, and the stored title — not that
-    // text — decides whether confirming saves. So confirming the untouched
-    // prefill pins the localized name and the row stops following the language.
-    fireEvent.click(screen.getByRole('button', { name: '工作区“默认工作区”的操作' }))
+    fireEvent.click(screen.getByRole('button', { name: '工作区“default-workspace”的操作' }))
     fireEvent.click(screen.getByRole('menuitem', { name: '重命名' }))
-    expect(screen.getByLabelText<HTMLInputElement>('工作区名称').value).toBe('默认工作区')
+    expect(screen.getByLabelText<HTMLInputElement>('工作区名称').value).toBe('default-workspace')
     expect(screen.queryByRole('alert')).toBeNull()
     const confirm = screen.getByRole<HTMLButtonElement>('button', { name: '重命名' })
-    expect(confirm.disabled).toBe(false)
-    fireEvent.click(confirm)
-    expect(renameWorkspace).toHaveBeenCalledWith(wid('alpha'), '默认工作区')
+    expect(confirm.disabled).toBe(true)
+    expect(renameWorkspace).not.toHaveBeenCalled()
   })
 
   it('renames a workspace through the row menu dialog', async () => {

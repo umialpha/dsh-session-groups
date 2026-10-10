@@ -1,0 +1,5 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>R-005 同级区块 First Slice</title><meta name="review:id" content="R-005"><meta name="review:status" content="resolved"><meta name="review:ticket" content="T-002"><meta name="review:design" content="D-002"><meta name="review:created" content="2026-10-10"><meta name="review:updated" content="2026-10-10"><link rel="stylesheet" href="../assets/style.css"></head>
+<body><main class="page"><header class="page-header"><p class="eyebrow">Review</p><h1>R-005 同级区块 First Slice</h1><p class="summary">状态：resolved / Gate：First Slice / 范围：根 slot、跨区 claim、模式清理与启动恢复</p></header><section><h2>Round 1（architecture）</h2><p>ARCH: SOUND / Verdict: PASS；无 Critical、Structural 或 Major。同步 ref claim 阻止源列表 dragEnd 重排，每源 symbol 保护新列表 drag，模式、filter、reset 与卸载清理均覆盖。</p><p>Minor：两份 Workspace package README 与 slot owner 注释仍描述旧行为。</p><p>作者决定：Fix，同步说明根部 slot、首次选择真实文件夹及存储标题原文。验证：19 files / 504 tests、typecheck 和四包安装 smoke 通过。</p><p>下一步：通过 — 文档修正不改变逻辑；继续完整 UI 与安装版浏览器验收。</p></section></main></body>
+</html>

@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>R-004 同级区块 Doc Gate</title><meta name="review:id" content="R-004"><meta name="review:status" content="resolved"><meta name="review:ticket" content="T-002"><meta name="review:design" content="D-002"><meta name="review:created" content="2026-10-10"><meta name="review:updated" content="2026-10-10"><link rel="stylesheet" href="../assets/style.css"></head>
+<body><main class="page"><header class="page-header"><p class="eyebrow">Review</p><h1>R-004 同级区块 Doc Gate</h1><p class="summary">状态：resolved / Gate：Doc Gate / 范围：D-002 布局方案</p></header><section><h2>Round 1（architecture）</h2><p>ARCH: SOUND / Verdict: PASS；无 Critical、Structural 或 Major。</p><p>Minor：grouped/tree 复用组件，模式切换不能只依赖卸载清理 drag。</p><p>作者决定：Fix，设计明确 view/filter/reset key 变化清空源 drag 与其根部交接，增加切换后可再次正常拖放的回归。</p><p>下一步：通过 — 修改为局部生命周期约束，不改变既有包、Host 数据或 Remote API；默认工作区策略单独确认。</p></section>
+<section><h2>Round 2（默认目录策略补充）</h2><p>ARCH: SOUND / Verdict: PASS。空安装不再调用 initializeDefault，首次通过现有文件夹入口显式选择。既有 Session、cwd、历史选择和最近工作区恢复保持原路径；不增加 Host 数据或配置。</p><p>无阻断项。作者决定：通过，D-002 记录官方 composer 对历史自动目录标题的独立特判及用户可自行重命名的限制。</p><p>下一步：通过 — 当前实现和已有数据保留策略一致。</p></section>
+</main></body>
+</html>

@@ -238,7 +238,7 @@ describe('SessionGroupsView', () => {
     const rootRow = sessionRow('One')
     const list = rootRow.parentElement as HTMLElement
     const children = [...list.children]
-    const header = screen.getByText('置顶').parentElement as HTMLElement
+    const header = screen.getByText('置顶').closest('button')!.parentElement as HTMLElement
     const headerClass = header.className
 
     ui.setExternalSessionDrag('loose')
@@ -252,6 +252,74 @@ describe('SessionGroupsView', () => {
     fireDrag(header, 'drop', 0)
     expect(ui.claimDrop).toHaveBeenCalledOnce()
     expect(ui.moveSession).toHaveBeenCalledWith(sid('loose'), null, null)
+  })
+
+  it('folds all Pinned rows and preserves the named-group disclosure state', () => {
+    mount()
+    fireEvent.click(groupRow('Work'))
+    expect(screen.queryByText('One')).toBeNull()
+
+    const collapse = screen.getByRole('button', { name: '折叠置顶' })
+    expect(collapse.getAttribute('aria-expanded')).toBe('true')
+    fireEvent.click(collapse)
+    const expand = screen.getByRole('button', { name: '展开置顶' })
+    expect(expand.getAttribute('aria-expanded')).toBe('false')
+    expect(screen.queryByText('Work')).toBeNull()
+    expect(screen.queryByRole('treeitem')).toBeNull()
+    expect(screen.getByRole('button', { name: '创建分组' })).toBeTruthy()
+
+    fireEvent.click(expand)
+    expect(groupRow('Work').getAttribute('aria-expanded')).toBe('false')
+    expect(screen.queryByText('One')).toBeNull()
+    expect(screen.getByText('Three')).toBeTruthy()
+    fireEvent.click(groupRow('Work'))
+    expect(screen.getByText('One')).toBeTruthy()
+  })
+
+  it('keeps a folded section closed after create failure and opens it after successful creation', async () => {
+    const ui = mount()
+    fireEvent.click(screen.getByRole('button', { name: '折叠置顶' }))
+    fireEvent.click(screen.getByRole('button', { name: '创建分组' }))
+    const dialog = screen.getByRole('dialog', { name: '创建分组' })
+    const input = within(dialog).getByRole('textbox', { name: '分组名称' })
+    fireEvent.change(input, { target: { value: 'Work' } })
+    ui.createGroup.mockResolvedValueOnce({
+      ok: false,
+      error: { code: 'title-conflict', title: 'Work', existingGroupId: gid('work') },
+    })
+    fireEvent.click(within(dialog).getByRole('button', { name: '创建' }))
+    await waitFor(() => { expect(within(dialog).getByRole('alert')).toBeTruthy() })
+    expect(screen.getByRole('button', { name: '展开置顶' })).toBeTruthy()
+    expect(screen.queryByText('One')).toBeNull()
+
+    fireEvent.change(input, { target: { value: 'Ideas' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: '创建' }))
+    await waitFor(() => { expect(screen.queryByRole('dialog', { name: '创建分组' })).toBeNull() })
+    expect(screen.getByRole('button', { name: '折叠置顶' }).getAttribute('aria-expanded')).toBe('true')
+    expect(screen.getByText('One')).toBeTruthy()
+  })
+
+  it('accepts a project Session on the folded header and expands the Pinned list', () => {
+    const ui = mount({ externalSessionId: 'loose' })
+    fireEvent.click(screen.getByRole('button', { name: '折叠置顶' }))
+    const header = screen.getByRole('button', { name: '展开置顶' }).parentElement as HTMLElement
+    expect(screen.queryByText('Work')).toBeNull()
+    fireDrag(header, 'dragOver', 0)
+    fireDrag(header, 'drop', 0)
+    expect(ui.claimDrop).toHaveBeenCalledOnce()
+    expect(ui.moveSession).toHaveBeenCalledExactlyOnceWith(sid('loose'), null, null)
+    expect(screen.getByRole('button', { name: '折叠置顶' }).getAttribute('aria-expanded')).toBe('true')
+    expect(screen.getByText('Work')).toBeTruthy()
+  })
+
+  it('keeps the folded header closed when a pending layout refuses another drop', () => {
+    const ui = mount({ externalSessionId: 'loose', view: readyView({ pending: true }) })
+    fireEvent.click(screen.getByRole('button', { name: '折叠置顶' }))
+    const header = screen.getByRole('button', { name: '展开置顶' }).parentElement as HTMLElement
+    expect(fireDrag(header, 'drop', 0).defaultPrevented).toBe(false)
+    expect(ui.claimDrop).not.toHaveBeenCalled()
+    expect(ui.moveSession).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: '展开置顶' })).toBeTruthy()
   })
 
   it('renders loading and both retryable empty-snapshot failure forms', () => {

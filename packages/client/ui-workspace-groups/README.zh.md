@@ -7,7 +7,7 @@ kind: "package-reference"
 
 [English](README.md) | 中文
 
-本包 fork 自 DeepSeek Harness 的 `@deepseek-ai/dsh-client-ui-workspace`，基线为 tag `dsh-v0.2.1-alpha.2`（commit `d743267388641bc76f17c45ce8b4c231aed1d32c`）。`0.1.0` 只支持 DSH `0.2.1-alpha.2`；它保留上游 Workspace 行为，仅增加可选的 `sidebar.workspaces.sessionGroups` slot 与拖放接管。复制的上游代码仍归 Copyright (c) 2026 DeepSeek，并按本包内的 MIT License 发布。
+本包 fork 自 DeepSeek Harness 的 `@deepseek-ai/dsh-client-ui-workspace`，基线为 tag `dsh-v0.2.1-alpha.2`（commit `d743267388641bc76f17c45ce8b4c231aed1d32c`）。`0.1.0` 只支持 DSH `0.2.1-alpha.2`；它在 Workspace 浏览界面中增加可选的 `sidebar.workspaces.sessionGroups` slot。复制的上游代码仍归 Copyright (c) 2026 DeepSeek，并按本包内的 MIT License 发布。
 
 桌面端产品事件使用可选的[产品埋点服务](../product-analytics/README.zh.md)，不包含普通 Web 交互。
 
@@ -32,6 +32,8 @@ kind: "package-reference"
 用侧边栏浏览 Workspace 及其 Session、重排它们并新建会话；在 Session Intent 主视觉区用选择器为新会话选择 Workspace。打开的 Workspace 默认显示五条空闲的非空白 Session。正在运行的 Session（包括有子会话正在运行的父会话）始终按原顺序显示，不占用这五条配额；当前选中的空白**新会话**在首条提示词落地前也作为额外行。每次点击**展开其余**最多再显示五条空闲 Session；全部显示后，**收起**恢复初始行数，但仍显示正在运行的 Session。关闭再打开 Workspace 也会恢复该折叠投影。
 
 未保存标题的历史会话显示本地化名称「未命名 / Untitled」，不使用目录名兜底。当前空会话仍显示「新会话」，其他空会话仍隐藏。重命名草稿使用已保存标题，无标题时留空；无标题行不提供标题复制。
+
+组合 Session groups Client 后，“置顶”和“工作区”是侧边栏中的同级区块。置顶位于工作区标题上方，在侧边栏展开时持续显示于分组、目录树、单列表和搜索视图中。置顶主体限制滚动高度，为工作区保留空间。整体折叠只作用于当前页面；切换视图保留折叠选择，刷新后恢复展开。创建分组或在折叠的置顶标题上接受拖放后，置顶区会展开。
 
 ### 重排序与视图选项
 
@@ -77,9 +79,9 @@ Session 行渲染运行时的实时 `pendingInteraction` 分类：审批显示**
 
 重新打开工作区和显式准备草稿尝试获取列表中第一个符合条件的空白会话；启动恢复尝试已保存的空白会话。若该写锁被占用，导航直接新建 Session，不再尝试其他空白会话。其他获取错误会中止请求：显式新建会话或在 hero 中选择工作区时，失败以短暂提示展示，引用 Host 的错误码和消息（例如 preset 挂载失败），非 Host 拒绝的失败则显示其自身消息；已被后续导航或 owner 销毁取代的请求不弹提示，启动恢复仍只报告到控制台。已释放的空白会话被复用时保留 slash 命令状态。后续导航会取消尚未完成的启动选择。
 
-Workspace 和 Session 的启动基线均就绪后，空安装环境调用 `workspaces.initializeDefault`，创建或复用其空白 Session。选中该 Session 后输入框才可编辑，不会自动提交消息。后续导航或所属上下文销毁会阻止启动流程选中其结果。不符合首次使用条件时仍可选择文件夹，不显示错误。默认工作区创建失败时显示短暂提示，引导用户通过“选择工作区”选择文件夹，直到下次启动才重试。Session 创建失败沿用普通的恢复错误处理。登记成功的工作区在 Session 创建或后续提交失败时仍然保留。
+空安装环境首次使用时，通过现有 Workspace 选择器选择真实目录，登记后打开 Session；本替代插件不调用 `workspaces.initializeDefault`。已有 Workspace 与 Session 沿用普通启动恢复流程，继续使用原目录。插件不迁移目录，也不重命名已保存的 Workspace。登记成功的 Workspace 在 Session 创建或后续提交失败时仍然保留。
 
-首次使用的目录名与其存储标题都是固定的，都不跟随读者语言：`workspaces.initializeDefault` 不携带任何名称，同一安装环境在切换语言后仍只有一个磁盘路径和一个存储标题。仍保留该自动标题的工作区，在本包展示它的所有位置——侧栏行及其悬浮卡片、搜索结果元信息、hero 选择器菜单、重命名与删除对话框——都通过控制器的 `workspaceDisplayTitle` 显示为本地化的默认名称。重命名对话框以屏幕上的标签作为初值，而判断确认是否需要保存用的是存储标题，因此对这类工作区直接确认未改动的初值即可固定该名称，该行不再跟随语言；重名检查按工作区身份而非标题排除目标自身。
+本包在侧栏行及其悬浮卡片、搜索元信息、hero 选择器菜单、重命名与删除对话框中均显示 Workspace 的存储标题原文。重命名对话框以该存储标题为初值，确认未改动的草稿不会重命名；重名检查按 Workspace 身份排除目标自身。官方 Conversation 的输入区仍独立本地化历史标题 `default-workspace`；用户可以自行重命名该 Workspace 来改变输入区标签。插件保留现有 Conversation 与用户数据。
 
 <a id="understand-the-implementation"></a>
 ## 理解实现
@@ -88,6 +90,8 @@ Workspace 和 Session 的启动基线均就绪后，空安装环境调用 `works
 <summary>实现细节——点击展开</summary>
 
 本包是一条组合：两个目标 slot 都由其他插件声明，因此 `apply` 使用 `slots.inject()` 在各自的声明生命周期内完成注册，并在目标 slot 的声明恢复后重新注册。
+
+WorkspaceBrowser 在根容器、工作区标题之前渲染 `sidebar.workspaces.sessionGroups`。SessionTree 与 FlatList 继续拥有行重排状态，向 WorkspaceBrowser 交接当前 Session id 与同步 `claimDrop`。置顶区接管 drop 后，源列表不会保存此前的重排标记。拖放结束、源列表卸载或视图／筛选切换只清空本源的交接；搜索结果仍不可拖动。
 
 浏览器入口还为每个 Session 行声明两个 root 作用域的 `list` 子 slot：`sidebar.session.row.leading` 仅在该行主状态为 idle 时渲染、归档行留空，`sidebar.session.row.hover` 仅在该行的悬浮卡片打开时挂载。两者只接收行的 Session 身份，占用方据此读取自己的数据；Session 作用域的 slot 会强制建立 Session 绑定，从而激活并保留列表中每个 Session。
 

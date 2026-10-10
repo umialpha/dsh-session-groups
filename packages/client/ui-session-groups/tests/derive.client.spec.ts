@@ -20,7 +20,6 @@ describe('deriveSessionGroups', () => {
         workspace('first', ['manual-old'], 'First workspace'),
         workspace('duplicate', ['manual-old'], 'Second workspace'),
       ],
-      'Default workspace',
       [],
       [sid('manual-old'), sid('manual-new'), sid('missing')],
       snapshot([
@@ -68,7 +67,6 @@ describe('deriveSessionGroups', () => {
       sessions,
       new Map([[owner.id, ownerStatus]]),
       [],
-      'Default workspace',
       [archived.id],
       [current.id, hiddenBlank.id, archived.id, subagent.id, owner.id],
       snapshot([group('grouped', 'Grouped', [
@@ -117,7 +115,6 @@ describe('deriveSessionGroups', () => {
       sessions,
       noStatus,
       [],
-      'Default workspace',
       [],
       [noCwd.id, emptyCwd.id, rootCwd.id, sid('absent')],
       snapshot([group('paths', 'Paths', ['absent', 'no-cwd', 'empty-cwd', 'root-cwd'])]),
@@ -142,7 +139,6 @@ describe('deriveSessionGroups', () => {
       sessions,
       noStatus,
       [],
-      'Default workspace',
       [],
       [sid('new-pin'), sid('grouped'), sid('root')],
       snapshot([group('work', 'Work', ['grouped', 'stale'])], 'r1', ['root', 'stale']),
@@ -152,19 +148,18 @@ describe('deriveSessionGroups', () => {
     expect(projection.groups[0]?.sessions.map(item => item.id)).toEqual([sid('grouped')])
   })
 
-  it('localizes the default Workspace sentinel through the shared display helper', () => {
+  it('renders folder titles verbatim without a special default Workspace name', () => {
     const sessions = sessionState([summary('default-session', 1)])
     const projection = deriveSessionGroups(
       sessions,
       noStatus,
       [workspace('default', ['default-session'], 'default-workspace')],
-      'Default workspace',
       [],
       [sid('default-session')],
       snapshot([], 'r1', ['default-session']),
     )
 
-    expect(projection.defaultSessions[0]?.workspace).toBe('Default workspace')
+    expect(projection.defaultSessions[0]?.workspace).toBe('default-workspace')
   })
 
   it('keeps a fallback display title separate from an absent durable rename title', () => {
@@ -175,7 +170,6 @@ describe('deriveSessionGroups', () => {
       sessions,
       noStatus,
       [],
-      'Default workspace',
       [],
       [sid('fallback')],
       snapshot([], 'r1', ['fallback']),

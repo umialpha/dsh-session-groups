@@ -203,17 +203,14 @@ describe('ui-workspace apply', () => {
     ])
   })
 
-  it('reports a default Workspace creation failure through the shared notice overlay', async () => {
+  it('leaves an empty installation ready for directory selection without preparing a default Workspace', async () => {
     const b = await bench()
     onTestFinished(() => b.ctx.fiber.dispose())
     b.initializeDefault.mockRejectedValueOnce(new Error('denied'))
     declare(b.slots, 'shell.overlay')
     await b.ctx.plugin({ inject: [...inject], apply }).await()
     const face = faceOf(entry(b.slots, 'shell.overlay', 'workspace.row-toast')) as RowToastInjected
-    await vi.waitFor(() => {
-      expect(face.hooks.toast.getSnapshot()).toMatchObject({ kind: 'defaultWorkspaceFailed' })
-    })
-    face.dismissToast()
+    expect(b.initializeDefault).not.toHaveBeenCalled()
     expect(face.hooks.toast.getSnapshot()).toBeNull()
   })
 

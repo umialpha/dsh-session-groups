@@ -10,7 +10,7 @@
   <meta name="ticket:type" content="feature">
   <meta name="ticket:level" content="L">
   <meta name="ticket:created" content="2026-10-10">
-  <meta name="ticket:updated" content="2026-10-10">
+  <meta name="ticket:updated" content="2026-10-11">
   <link rel="stylesheet" href="../docs/assets/style.css">
 </head>
 <body>
@@ -18,7 +18,7 @@
     <header class="page-header">
       <p class="eyebrow">Ticket</p>
       <h1>T-002 完整置顶分组与拖放体验</h1>
-      <p class="summary">状态：review / 优先级：P1 / 类型：feature / 分级：L — 完成持久化 CRUD、跨模块拖放、原生 Session 操作适配与发布交付。</p>
+      <p class="summary">状态：review / 优先级：P1 / 类型：feature / 分级：L — D-002 同级区块、整体折叠与首次目录选择已实现，等待用户视觉与原生拖放验收。</p>
     </header>
     <section>
       <h2>目标</h2>
@@ -28,6 +28,8 @@
       <h2>验收标准</h2>
       <ul>
         <li>项目树上方直接显示置顶默认层和命名分组，不使用 tab，不显示“未分组”标签。</li>
+        <li>置顶与工作区为同级区块；置顶整体可折叠，搜索与列表模式切换不隐藏置顶。</li>
+        <li>空安装通过现有入口选择真实目录，不自动创建默认工作区；已有目录与 Session 保留。</li>
         <li>可创建、重命名、删除、折叠和排序分组；可在默认层、组内和组间拖动 Session。</li>
         <li>可从任意项目拖入未置顶 Session，接受后自动置顶并保存目标位置。</li>
         <li>blank Session 仅可打开，无菜单、时间和拖动；普通 Session 保持设计文档规定的原生操作语义。</li>
@@ -41,10 +43,11 @@
     </section>
     <section>
       <h2>下一步</h2>
-      <p>等待用户在已启动的安装版 Web 中完成视觉与交互验收；明确接受后再把 ticket 标记为 <code>done</code>。</p>
+      <p>请用户验收 <a href="../docs/designs/D-002-sidebar-sections.html">D-002</a> 的同级区块与折叠效果，并用真实鼠标验证项目会话拖入置顶与分组、组间移动和重启持久化；暂不发布。</p>
     </section>
     <section>
       <h2>验证</h2>
+      <p>以下为完整分组初版证据；本轮 D-002 的证据单独列在下一节。</p>
       <ul>
         <li><code>pnpm test</code>：24 files / 528 tests 通过；其中 Workspace 镜像 12 files / 434 tests、Session Groups UI 7 files / 60 tests 通过。</li>
         <li><code>pnpm run typecheck</code>：通过。</li>
@@ -56,10 +59,24 @@
       </ul>
     </section>
     <section>
+      <h2>D-002 本轮验证</h2>
+      <ul>
+        <li><code>pnpm exec vitest run packages/client/ui-workspace-groups/tests packages/client/ui-session-groups/tests --reporter=dot</code>：19 files / 504 tests 通过；包含跨三模式 claim、源身份隔离、reset 清理、折叠与空安装回归。</li>
+        <li><code>pnpm run typecheck</code> 和 <code>pnpm run lint</code>：通过；lint 保留 2 个上游测试 fixture warning。</li>
+        <li><code>node tests/install/session-groups.smoke.mjs --dsh-cli /tmp/dsh-session-groups-smoke.sDb06f/node_modules/.bin/dsh --keep</code>：build、四包 pack、干净安装、启动、移除和官方入口恢复通过。</li>
+        <li>局部滚动留白修正后，<code>pnpm exec vitest run packages/client/ui-session-groups/tests/styles.client.spec.ts</code>：2 项通过；<code>pnpm run build:client</code>、四包重新 pack 和安装通过。</li>
+        <li>安装版浏览器：首次不生成默认目录，可选择真实仓库目录；原生置顶同步顶部；整体折叠关闭菜单，再展开保留组折叠状态。480px 矮窗口置顶高度受限至 45%，列表独立滚动，工作区保持可见。浅/深主题及 tree/flat/search 常驻检查通过；重启后分组、置顶和真实工作区恢复。截图：<a href="../docs/screenshots/D-002-sidebar-dark.jpg">深色</a>、<a href="../docs/screenshots/D-002-sidebar-light.jpg">浅色</a>。</li>
+        <li><a href="../docs/reviews/R-004-sidebar-sections.html">R-004</a> Doc Gate、<a href="../docs/reviews/R-005-sidebar-slice.html">R-005</a> First Slice 和 <a href="../docs/reviews/R-006-sidebar-ui.html">R-006</a> MR Gate：ARCH: SOUND / PASS。</li>
+        <li>CUA 原生拖动未触发可见变化，拖放仅有组件回归证据；真实鼠标拖放仍待用户验收。</li>
+      </ul>
+    </section>
+    <section>
       <h2>记录</h2>
       <ul>
         <li>2026-10-10：R-002 通过后创建，开始完整实现。</li>
         <li>2026-10-10：完成完整分组 UI、持久化、拖放、原生 Session 操作适配、发布材料和安装 smoke；R-003 MR Gate 通过，状态改为 review，等待用户视觉与交互验收。</li>
+        <li>2026-10-10：用户要求置顶可折叠、与工作区同级，并取消默认工作区概念；D-002 布局 Doc Gate 通过，继续实现。</li>
+        <li>2026-10-11：完成 D-002、通过定向测试、类型检查、打包安装和三项评审；重启演示环境供用户验收，状态恢复 review。</li>
       </ul>
     </section>
   </main>

@@ -112,13 +112,13 @@ export interface SessionRowScheduleOwnerProps {
   readonly sessionId: SessionId
 }
 
-/** Optional global Pinned-area share owned by the built-in Workspace tree. */
+/** Optional global Pinned-area share owned by WorkspaceBrowser. */
 export interface WorkspaceSessionGroupsOwnerProps {
-  /** Project Session currently being dragged, or null outside a Session drag. */
+  /** Session currently dragged from the tree or flat list, or null otherwise. */
   activeSessionDrag: {
     /** Session offered to the optional Pinned area. */
     sessionId: SessionId
-    /** Claim this drop synchronously so the Workspace tree cannot commit a reorder. */
+    /** Claim this drop synchronously so the source Session list cannot commit a reorder. */
     claimDrop: () => void
   } | null
 }
@@ -129,7 +129,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     'conversation.hero.workspace.directoryFlow': { kind: 'single'; scope: 'root'; owner: DirectoryFlowOwnerProps }
     /** Directory-flow hole under the sidebar browsing region (declared by the WorkspaceBrowser entry). */
     'sidebar.workspaces.directoryFlow': { kind: 'single'; scope: 'root'; owner: DirectoryFlowOwnerProps }
-    /** Optional global Pinned area rendered before the built-in Workspace tree. */
+    /** Optional global Pinned area rendered before the sibling Workspace section header. */
     'sidebar.workspaces.sessionGroups': { kind: 'single'; scope: 'root'; owner: WorkspaceSessionGroupsOwnerProps }
     /**
      * Leading decoration of one Session row, in the 16px cell before the title

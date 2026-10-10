@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D-002 同级置顶与工作区区块</title>
+  <meta name="design:id" content="D-002">
+  <meta name="design:status" content="implemented">
+  <meta name="design:created" content="2026-10-10">
+  <meta name="design:updated" content="2026-10-11">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header"><p class="eyebrow">Design</p><h1>D-002 同级置顶与工作区区块</h1><p class="summary">侧边栏直接显示同级的“置顶”和“工作区”，置顶可折叠。</p></header>
+    <section><h2>决定与范围</h2><p>替代 Workspace Client 在自身根容器、工作区标题之前渲染现有置顶 slot。置顶区持续出现在展开侧边栏的 grouped、tree、flat 和搜索模式中。工作区搜索、排序、导航、原生置顶集合与分组 Host 数据继续由原实现负责。</p><p>本设计修订 D-001 中置顶 slot 嵌在项目树、只在 grouped 模式显示和始终展开的规定。按照用户“不使用默认工作区”的要求，空安装不自动创建专用默认目录，用户通过现有文件夹选择入口选择真实工作区。已有工作区及其 Session 仍按原路径恢复；插件显示存储标题原文，不特殊投影为“默认工作区”，不自动重命名或迁移目录。</p></section>
+    <section><h2>已有自动目录的限制</h2><p>官方 Conversation 的 composer chip 自行本地化历史标题 <code>default-workspace</code>，且没有公开标题扩展点。插件不替换 Conversation，也不为隐藏此标签修改用户数据；已有自动目录可由用户通过工作区重命名操作改成所需标题。新安装不会生成该目录。</p></section>
+    <section><h2>方案比较</h2><p>只移动工作区标题到树内，改动较少，但搜索或 flat 切换仍会隐藏置顶区；采用根容器中的同级区块，让两者在模式切换时保持可见。新增独立 sidebar owner 会扩大 bundle 与 shell 差异，本次沿用现有 Workspace owner 和现有 slot 名。</p></section>
+    <section><h2>责任与数据</h2><ul><li>WorkspaceBrowser 拥有两个区块的排布与当前 Session drag 交接。</li><li>SessionTree 与 FlatList 继续拥有项目内重排状态，向父组件上报 Session id 与同步 claimDrop。分组接受 drop 后同步 claim，阻止源列表 dragEnd 保存此前的重排位置；结束或卸载时清空交接。</li><li>SessionGroupsView 拥有置顶整体折叠状态，标题使用带 aria-expanded 的按钮。折叠仅隐藏列表，创建按钮、对话框与标题 drop target 保留；成功创建分组或接受标题 drop 后展开。</li><li>整体折叠为本次页面内 UI 状态，不改变 Host 存储格式；搜索与分组模式切换保持状态，刷新恢复展开。</li><li>置顶主体使用受限高度的滚动区域，保留工作区可用空间；标题对齐并复用 DSH 的颜色、图标和 hover/focus 规则。</li></ul></section>
+    <section><h2>失败与生命周期</h2><p>折叠与布局移动没有 Host mutation。跨区移动继续遵循 D-001 的先 pin 后保存布局、CAS 冲突和失败反馈规则。源列表卸载或 view/filter/reset key 变化时清空本源 drag，并只撤销本源登记的根部交接；grouped 与 tree 复用组件时也执行此清理。slot 撤销时不改变原生排序。搜索结果保持原有不可拖动行为。</p></section>
+    <section><h2>新概念与接口</h2><p>仅增加一个页面内折叠 boolean 和源列表到 WorkspaceBrowser 的内部 drag 回调。现有 slot owner、Registry、Remote API、bundle 配置和 durable 数据保持原定义。</p></section>
+    <section><h2>文件与实现顺序</h2><ol><li>调整 WorkspaceBrowser 根布局并接通 tree/flat claim，用现有跨区回归验证真实交接；这是本次纵向切片。</li><li>为 SessionGroupsView 添加整体折叠、受限滚动与本地化 accessibility copy。</li><li>运行相关组件测试、typecheck、build、安装 smoke；重启安装版并检查两种主题、折叠和拖放。</li></ol><p>涉及 WorkspaceBrowser.tsx、分组 view/CSS/locales、两包对应测试和发布 README，不增加运行包。</p></section>
+    <section><h2>验收与风险</h2><ul><li>置顶在工作区标题之前，为其同级 sibling；搜索/flat/tree 切换后仍可见。</li><li>折叠后隐藏全部置顶 Session 与命名组，保留标题与创建入口；再次展开恢复原分组折叠状态。</li><li>grouped、tree、flat 中普通 Session 拖入置顶后只提交置顶布局，不能同时提交源项目排序。</li><li>折叠标题仍接受普通 Session，成功后展开；大量置顶行不挤掉工作区。</li><li>主要风险为 stale drag 回调和大列表布局，分别由跨模式 claim 回归与真实浏览器验证覆盖。</li></ul></section>
+    <section><h2>关联</h2><p><a href="D-001-workspace-replacement.html">D-001</a>；<a href="../../tickets/T-002-complete-session-groups.html">T-002</a>；既有实现 MR Gate <a href="../reviews/R-003-complete-session-groups.html">R-003</a>。本次 <a href="../reviews/R-004-sidebar-sections.html">R-004</a> Doc Gate、<a href="../reviews/R-005-sidebar-slice.html">R-005</a> First Slice 与 <a href="../reviews/R-006-sidebar-ui.html">R-006</a> MR Gate 均为 ARCH: SOUND / PASS。实现已落地，T-002 保持 review 等待用户验收。</p></section>
+  </main>
+</body>
+</html>

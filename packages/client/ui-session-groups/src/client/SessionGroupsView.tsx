@@ -1,12 +1,11 @@
 /** Global Pinned Session area rendered before the unchanged project tree. */
-import { type DragEvent as ReactDragEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { type DragEvent as ReactDragEvent, useEffect, useId, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 import {
   Button,
   IconEditOutlineRegular,
   IconEllipsisOutlineRegular,
   IconListPenOutlineRegular,
-  IconPinFillRegular,
   IconPlusOutlineRegular,
   IconTrashOutlineRegular,
   IconTriangleRightFillRegular,
@@ -346,6 +345,8 @@ export function SessionGroupsView({
   const pinnedKey = pinnedSessionIds.join('\u0000')
   const refreshedPins = useRef(pinnedKey)
   const pinnedSet = useMemo(() => new Set(pinnedSessionIds), [pinnedSessionIds])
+  const [expanded, setExpanded] = useState(true)
+  const listId = useId()
   const [collapsed, setCollapsed] = useState<readonly SessionGroupId[]>([])
   const [activeDrag, setActiveDrag] = useState<ActiveDrag | null>(null)
   const [groupMarker, setGroupMarker] = useState<{ id: SessionGroupId; half: 'before' | 'after' } | null>(null)
@@ -371,7 +372,6 @@ export function SessionGroupsView({
         sessions,
         statuses,
         workspaces,
-        t('workspace.defaultName'),
         archivedSessionIds,
         pinnedSessionIds,
         state.snapshot,
@@ -419,6 +419,7 @@ export function SessionGroupsView({
       setEditPending(false)
       if (result.ok) {
         setEditTarget(null)
+        if (target === 'create') setExpanded(true)
         showSuccess(t(target === 'create' ? 'success.groupCreated' : 'success.groupRenamed'))
         return
       }
@@ -583,6 +584,7 @@ export function SessionGroupsView({
     event.preventDefault()
     event.stopPropagation()
     setRootDropOver(false)
+    setExpanded(true)
     commitSessionDrop({ targetGroupId: null, beforeSessionId: null })
   }
   useEffect(() => {
@@ -596,10 +598,17 @@ export function SessionGroupsView({
         onDragLeave={leaveRootDrop}
         onDrop={commitRootDrop}
       >
-        <span className={css.heading}>
-          <IconPinFillRegular />
-          {t('section.title')}
-        </span>
+        <button
+          type="button"
+          className={css.heading}
+          aria-label={t(expanded ? 'section.collapse' : 'section.expand')}
+          aria-expanded={expanded}
+          aria-controls={listId}
+          onClick={() => { setExpanded(value => !value) }}
+        >
+          <span>{t('section.title')}</span>
+          <IconTriangleRightFillRegular className={clsx(css.sectionChevron, expanded && css.chevronOpen)} />
+        </button>
         <Tooltip label={t('group.create')}>
           <button
             type="button"
@@ -619,11 +628,11 @@ export function SessionGroupsView({
         </div>
       )}
 
-      <div className={css.list}>
-        {state.status === 'loading' && state.snapshot === null && (
+      <div id={listId} className={css.list} hidden={!expanded}>
+        {expanded && state.status === 'loading' && state.snapshot === null && (
           <div className={css.status} role="status">{t('loading')}</div>
         )}
-        {projection !== null && (
+        {expanded && projection !== null && (
           <>
             {defaultRows.map(node => (
               <SessionGroupRow

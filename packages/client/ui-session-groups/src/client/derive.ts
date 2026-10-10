@@ -3,7 +3,6 @@ import type {
   SessionListState, SessionSummary,
 } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { WorkspaceView } from '@deepseek-ai/dsh-api-workspace-controller/client'
-import { workspaceDisplayTitle } from '@deepseek-ai/dsh-api-workspace-controller/default-workspace'
 import type { SessionStatusSnapshot } from '@deepseek-ai/dsh-client-ui-session/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { SessionGroupId, SessionGroupsSnapshot } from '@umialpha/dsh-session-group-registry/types'
@@ -92,7 +91,6 @@ function runningChildCount(
  * @param list - Global Session list projection.
  * @param statuses - Unified live UI status indexed by Session.
  * @param workspaces - Workspace accounts used to label Session rows.
- * @param defaultWorkspaceName - Localized label for the default Workspace sentinel.
  * @param archivedSessionIds - Sessions omitted from visible grouping rows.
  * @param pinnedSessionIds - Registry-global authority for visible membership.
  * @param snapshot - Authoritative root, named-group membership, and manual order.
@@ -102,7 +100,6 @@ export function deriveSessionGroups(
   list: SessionListState,
   statuses: SessionStatusSnapshot,
   workspaces: readonly WorkspaceView[],
-  defaultWorkspaceName: string,
   archivedSessionIds: readonly SessionId[],
   pinnedSessionIds: readonly SessionId[],
   snapshot: SessionGroupsSnapshot,
@@ -114,7 +111,7 @@ export function deriveSessionGroups(
   for (const workspace of workspaces) {
     for (const sessionId of workspace.sessionIds) {
       if (!workspaceBySession.has(sessionId)) {
-        workspaceBySession.set(sessionId, workspaceDisplayTitle(workspace.title, defaultWorkspaceName))
+        workspaceBySession.set(sessionId, workspace.title)
       }
     }
   }

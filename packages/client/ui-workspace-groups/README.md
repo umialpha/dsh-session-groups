@@ -7,7 +7,7 @@ kind: "package-reference"
 
 English | [中文](README.zh.md)
 
-This package is a fork of DeepSeek Harness's `@deepseek-ai/dsh-client-ui-workspace` at tag `dsh-v0.2.1-alpha.2` (commit `d743267388641bc76f17c45ce8b4c231aed1d32c`). Version `0.1.0` supports only DSH `0.2.1-alpha.2` and keeps the upstream Workspace behavior while adding the optional `sidebar.workspaces.sessionGroups` slot and drag-drop claim. The copied upstream code remains Copyright (c) 2026 DeepSeek and is distributed under the MIT License in this package.
+This package is a fork of DeepSeek Harness's `@deepseek-ai/dsh-client-ui-workspace` at tag `dsh-v0.2.1-alpha.2` (commit `d743267388641bc76f17c45ce8b4c231aed1d32c`). Version `0.1.0` supports only DSH `0.2.1-alpha.2` and adds the optional `sidebar.workspaces.sessionGroups` slot to Workspace browsing. The copied upstream code remains Copyright (c) 2026 DeepSeek and is distributed under the MIT License in this package.
 
 Desktop product events use the optional [product analytics service](../product-analytics/README.md); ordinary Web interactions are excluded.
 
@@ -32,6 +32,8 @@ This package lets users browse grouped or flat Session lists, choose a Workspace
 Use the sidebar to browse Workspaces and their Sessions, reorder them, and start new ones; use the picker in the Session Intent hero to choose a Workspace for a new session. An open Workspace shows five idle, non-blank Sessions by default. Running Sessions, including parents with running children, remain visible in their ordered positions without using that quota; the selected blank **New Session** is also an extra row until its first prompt. Each **Show more** click reveals up to five more idle Sessions; after the final batch, **Show less** restores the initial rows while keeping running Sessions visible. Closing and reopening the Workspace also restores this folded projection.
 
 History rows without a stored title use the localized unnamed label (未命名 / Untitled), rather than a directory name. The current blank row remains New Session; other blank rows remain hidden. Rename drafts use the stored title, or start empty when unnamed; unnamed rows do not offer title copying.
+
+With the Session groups Client composed, Pinned and Workspace are sibling sidebar sections. Pinned appears above the Workspace header and remains visible in grouped, tree, flat, and search views while the sidebar is expanded. Its scrolling body has a bounded height to leave room for Workspaces. The whole Pinned section can be collapsed for the current page; view changes preserve that choice and reloading expands it. Creating a group or accepting a drop on the collapsed Pinned header expands the section.
 
 ### Reordering and view options
 
@@ -77,9 +79,9 @@ Navigation and startup restoration obtain the selected Session's projections fro
 
 Workspace reopening and explicit draft preparation try to acquire the first eligible blank in catalog order; startup restoration tries the saved blank. If that writer is held, navigation creates a new Session without trying other blanks. Other acquisition failures abort the request: an explicit New Session or hero Workspace pick shows the failure as a transient notice quoting the Host's code and message (for example a preset that fails to mount) or, for a failure that is not a Host refusal, that failure's own message; a request a later navigation or owner disposal superseded raises no notice, and startup restoration reports only to the console. Released blanks retain their slash-command state when reused. Later navigation cancels a pending startup selection.
 
-Once both Workspace and Session startup baselines are ready, an empty installation calls `workspaces.initializeDefault` and creates or reuses its blank Session. The composer becomes editable when that Session is selected; no message is submitted automatically. Later navigation or owner disposal prevents startup from selecting its result. Ineligible first use leaves the folder picker available without an error. Default Workspace creation failure shows a transient notice directing the user to Choose workspace, and is not retried until the next startup. Session creation failures use the ordinary restoration error handling. The registered Workspace remains available if Session creation or later submission fails.
+On an empty installation, first use begins by choosing a real directory through the existing Workspace picker to register it and open a Session; this replacement does not call `workspaces.initializeDefault`. Existing Workspaces and Sessions use the ordinary startup restoration path with their current directories. The plugin does not migrate directories or rename stored Workspaces. A registered Workspace remains available if Session creation or later submission fails.
 
-The first-use directory name and its stored title are fixed, so neither follows the reader's language: `workspaces.initializeDefault` carries no names, and one installation keeps one on-disk path and one stored title across language switches. A Workspace still carrying that automatic title is labeled with the localized default name wherever this package shows it — sidebar rows and their hover card, search result meta, the hero picker menu, and the rename and delete dialogs — through the controller's `workspaceDisplayTitle`. The rename dialog is seeded with the label on screen while the stored title decides whether confirming saves, so confirming the untouched prefill on such a Workspace pins that name and the row stops following the language; the duplicate-title check excludes the target by Workspace identity rather than by title.
+This package displays every stored Workspace title verbatim in sidebar rows and hover cards, search metadata, the hero picker menu, and rename and delete dialogs. The rename dialog uses that stored title as its initial value; confirming an unchanged draft does not rename it, and duplicate-title checks exclude the target by Workspace identity. The official Conversation composer independently localizes the historical title `default-workspace`; users can rename that Workspace to change its composer label. The plugin leaves Conversation and existing user data in place.
 
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
@@ -88,6 +90,8 @@ The first-use directory name and its stored title are fixed, so neither follows 
 <summary>Implementation internals — click to expand</summary>
 
 The package is one composition: both target slots are declared by other plugins, so `apply` uses `slots.inject()` to register for each declaration lifetime and re-register after a declaring slot is restored.
+
+WorkspaceBrowser renders `sidebar.workspaces.sessionGroups` at its root before the Workspace header. SessionTree and FlatList continue to own their row reorder state and share the active Session id and synchronous `claimDrop` with WorkspaceBrowser. Claiming a Pinned drop prevents the source list from saving its earlier reorder marker. Drag end, source unmount, and view/filter changes clear only that source's handoff; search results remain non-draggable.
 
 The browser entry also declares two root-scoped `list` child seats on each Session row: `sidebar.session.row.leading`, rendered only while that row's primary status is idle and left blank on an archived row, and `sidebar.session.row.hover`, mounted only while that row's hover card is open. Both take the row's Session identity and nothing else, so an occupant reads its own data by that id; a Session-scoped seat would force a Session binding, which would activate and retain every listed Session.
 

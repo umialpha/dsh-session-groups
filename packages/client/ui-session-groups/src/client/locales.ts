@@ -1,6 +1,8 @@
 /** Simplified Chinese dictionary (the key-set source of truth). */
 export const zh = {
   'section.title': '置顶',
+  'section.expand': '展开置顶',
+  'section.collapse': '折叠置顶',
   'section.empty': '尚无置顶会话',
   'groups.aria': '置顶会话',
   'group.create': '创建分组',
@@ -97,6 +99,8 @@ export type SessionGroupsKey = keyof typeof zh
 /** English dictionary, checked complete against the Chinese key set. */
 export const en = {
   'section.title': 'Pinned',
+  'section.expand': 'Expand Pinned',
+  'section.collapse': 'Collapse Pinned',
   'section.empty': 'No pinned Sessions yet',
   'groups.aria': 'Pinned Sessions',
   'group.create': 'Create group',

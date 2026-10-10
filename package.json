@@ -1,6 +1,12 @@
 {
   "name": "dsh-session-groups-workspace",
   "version": "0.1.0",
+  "author": "umialpha <roy236977634@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umialpha/dsh-session-groups.git"
+  },
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.28.5",

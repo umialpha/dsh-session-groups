@@ -2,6 +2,11 @@
   "name": "@umialpha/dsh-client-ui-workspace-groups",
   "description": "Version-pinned Workspace replacement with an optional Session groups slot",
   "version": "0.1.0",
+  "author": "umialpha <roy236977634@gmail.com>",
+  "homepage": "https://github.com/umialpha/dsh-session-groups#readme",
+  "bugs": {
+    "url": "https://github.com/umialpha/dsh-session-groups/issues"
+  },
   "publishConfig": {
     "access": "public"
   },

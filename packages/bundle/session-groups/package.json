@@ -2,6 +2,12 @@
   "name": "@umialpha/dsh-session-groups",
   "description": "Installable DeepSeek Harness Web profile layer for cross-project Pinned Session groups",
   "version": "0.1.0",
+  "author": "umialpha <roy236977634@gmail.com>",
+  "homepage": "https://github.com/umialpha/dsh-session-groups#readme",
+  "bugs": {
+    "url": "https://github.com/umialpha/dsh-session-groups/issues"
+  },
+  "keywords": ["dsh", "dsh-plugin", "deepseek-harness", "session-groups"],
   "publishConfig": {
     "access": "public"
   },

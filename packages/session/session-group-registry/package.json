@@ -2,6 +2,11 @@
   "name": "@umialpha/dsh-session-group-registry",
   "description": "Durable manual layout for the DeepSeek Harness Workspace pin set",
   "version": "0.1.0",
+  "author": "umialpha <roy236977634@gmail.com>",
+  "homepage": "https://github.com/umialpha/dsh-session-groups#readme",
+  "bugs": {
+    "url": "https://github.com/umialpha/dsh-session-groups/issues"
+  },
   "publishConfig": {
     "access": "public"
   },

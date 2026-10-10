@@ -2,6 +2,12 @@
 
 DSH Session Groups 是一个独立安装的 DeepSeek Harness Web 插件。在不修改 DSH 源码的前提下，它在原生 Workspace 项目树上方增加一个跨项目“置顶”区域，并允许用户把置顶 Session 整理到自定义分组中。
 
+## 预览状态
+
+当前公开的是 alpha 预览源码，四个 `@umialpha` 包尚未发布到 npm。下方 npm 安装命令仅供发布后使用，现在执行会找不到插件包。自动化测试和本地打包安装已通过；真实鼠标拖入置顶、组间移动及拖放排序仍待验收，不作为已通过的浏览器能力宣传。
+
+![置顶与工作区同级显示的浅色预览](docs/screenshots/D-002-sidebar-light.jpg)
+
 ## 功能
 
 - 保留官方 Workspace 的真实目录发现、项目树、搜索、原生置顶、Session 操作和导航行为。
@@ -23,11 +29,14 @@ DSH Session Groups 是一个独立安装的 DeepSeek Harness Web 插件。在不
 
 当前版本只支持表中的精确 DSH 版本。bundle 的 peer dependency 会在读取替换配置前拒绝不兼容版本，避免出现官方 Workspace 已停用但替代入口无法加载的半激活状态。
 
-## 安装
+DSH 的 npm `latest` 当前为 `0.2.0-rc.2`，不在支持范围内；请显式使用上表 alpha 版本，不要只安装未指定版本的 `@deepseek-ai/dsh`。
+
+## 安装（插件发布到 npm 后）
 
 发布到 npm 后，只安装 bundle；另外三个运行包会作为依赖自动安装：
 
 ```sh
+npm install -g @deepseek-ai/dsh@0.2.1-alpha.2
 dsh plugin --profile web add @umialpha/dsh-session-groups@0.1.0
 dsh web
 ```
@@ -35,6 +44,8 @@ dsh web
 不需要修改 DSH 源码、profile YAML 或 Workspace 配置。请打开本次 `dsh web` 输出的完整 URL；旧端口或缺少认证参数的 URL 可能显示 `dsh web authentication required`。
 
 如果使用本仓库的未发布版本，请先执行 `pnpm run build` 和安装 smoke；不要只链接 bundle 而遗漏另外三个 workspace 包。
+
+本地安装 smoke 使用临时 `DSH_HOME` 和四包 tarball，只用于开发验证，不会把插件安装到你的日常 Web profile。
 
 ## 使用
 
@@ -74,6 +85,12 @@ node tests/install/session-groups.smoke.mjs --dsh-cli /absolute/path/to/dsh
 ```
 
 架构与发布约束见 [D-001](docs/designs/D-001-workspace-replacement.html)，当前完整实现任务见 [T-002](tickets/T-002-complete-session-groups.html)。
+
+## 作者与反馈
+
+作者：[`umialpha`](https://github.com/umialpha) · [roy236977634@gmail.com](mailto:roy236977634@gmail.com)。问题和建议请提交到 [GitHub Issues](https://github.com/umialpha/dsh-session-groups/issues)。
+
+社区介绍草稿见 [community-post.md](docs/community-post.md)；npm 发布与公开介绍帖尚未完成。
 
 ## 许可证
 

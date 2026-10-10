@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>T-003 公开仓库与社区发布材料</title>
+  <meta name="ticket:id" content="T-003">
+  <meta name="ticket:status" content="doing">
+  <meta name="ticket:priority" content="P1">
+  <meta name="ticket:type" content="task">
+  <meta name="ticket:level" content="S">
+  <meta name="ticket:created" content="2026-10-11">
+  <meta name="ticket:updated" content="2026-10-11">
+  <link rel="stylesheet" href="../docs/assets/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <p class="eyebrow">Ticket</p>
+      <h1>T-003 公开仓库与社区发布材料</h1>
+      <p class="summary">状态：doing / 优先级：P1 / 类型：task / 分级：S — 补充发布元数据与文档，公开已有代码，不改变插件行为。</p>
+    </header>
+    <section>
+      <h2>目标</h2>
+      <p>创建公开仓库 <a href="https://github.com/umialpha/dsh-session-groups">umialpha/dsh-session-groups</a>，以 umialpha &lt;roy236977634@gmail.com&gt; 署名，提供准确的安装说明与可粘贴的社区介绍草稿。</p>
+    </section>
+    <section>
+      <h2>上下文</h2>
+      <p>用户已授权创建公开仓库并整理说明；本任务不包含 npm 发布、GitHub Release、社区发帖或目录投稿。不修改 DSH 上游源码，不重写已有提交历史。</p>
+    </section>
+    <section>
+      <h2>验收标准</h2>
+      <ul>
+        <li>根级和四个包的作者元数据一致，保留上游版权与许可。</li>
+        <li>README 明确源码预览、npm 尚未发布、精确 alpha 兼容版本及真实拖放待验收。</li>
+        <li>公开仓库默认分支为 main，附带 dsh-plugin topic；本地已有分支保留。</li>
+        <li>检查当前文件及可达历史中的凭据风险，验证发布元数据与文档链接。</li>
+        <li>社区介绍草稿明确发布状态，不宣称未完成的安装或交互验收。</li>
+      </ul>
+    </section>
+    <section>
+      <h2>关联设计</h2>
+      <p>无新增设计；已有实现见 <a href="../docs/designs/D-002-sidebar-sections.html">D-002</a>。</p>
+    </section>
+    <section>
+      <h2>下一步</h2>
+      <p>验证公开内容后推送 main；随后由用户完成真人拖放验收及 npm 登录，再另行授权 npm 发布和社区提交。</p>
+    </section>
+    <section>
+      <h2>验证</h2>
+      <ul>
+        <li>GitHub 登录账号已确认是 umialpha；仓库创建前确认同名仓库不存在。</li>
+        <li>独立只读检查：扫描当前 150 个文件、全部 refs 可达的 4 个提交和 191 个 blob；常见凭据模式未发现真实候选，两个 JPEG 无敏感画面或 EXIF/XMP。模式扫描不保证识别任意编码秘密。</li>
+        <li>Node 只读元数据与文档检查：5 个 manifest 的作者、许可、repository 一致，19 个文档的 64 个本地链接与末尾换行通过；预览状态与兼容版本明确。</li>
+        <li><code>pnpm --dir &lt;package&gt; pack --pack-destination /tmp/dsh-session-groups-public-pack.A0Z7mb</code>：四包通过。Node + tar 检查四份 tarball 的作者、public 设置、许可、exports 文件及 workspace 依赖替换通过。</li>
+        <li><code>git diff --check</code>：通过。未改动行为实现，不重复运行 T-002 已记录的测试、构建与安装 smoke。</li>
+        <li>GitHub 已创建公开仓库并添加 topic；代码推送与默认分支确认待完成。</li>
+      </ul>
+    </section>
+    <section>
+      <h2>记录</h2>
+      <ul><li>2026-10-11：用户确认作者和公开仓库准备范围，创建本任务。</li><li>2026-10-11：创建公开仓库，完成作者元数据、预览安装说明、英文介绍草稿、内容扫描和四包打包检查，准备推送 main。</li></ul>
+    </section>
+  </main>
+</body>
+</html>

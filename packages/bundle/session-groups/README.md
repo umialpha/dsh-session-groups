@@ -8,7 +8,10 @@
 
 ## 安装
 
+当前为源码预览，尚未发布到 npm。以下命令仅在四个插件包发布后可用；不要使用 DSH 的默认 `latest` 版本代替兼容的 alpha 版本。
+
 ```sh
+npm install -g @deepseek-ai/dsh@0.2.1-alpha.2
 dsh plugin --profile web add @umialpha/dsh-session-groups@0.1.0
 dsh web
 ```
@@ -25,3 +28,5 @@ dsh web
 移除后官方 Workspace 恢复。原生置顶与 Session 数据不受影响，分组 sidecar 数据保留。
 
 完整功能、限制与开发说明见[仓库 README](https://github.com/umialpha/dsh-session-groups#readme)。
+
+作者：umialpha <roy236977634@gmail.com>。原创部分按 MIT License 发布；Workspace 替代包保留 DeepSeek 的上游版权与许可。

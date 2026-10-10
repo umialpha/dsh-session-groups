@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>T-001 可安装的 Workspace 替换纵向切片</title>
+  <meta name="ticket:id" content="T-001">
+  <meta name="ticket:status" content="doing">
+  <meta name="ticket:priority" content="P1">
+  <meta name="ticket:type" content="feature">
+  <meta name="ticket:level" content="L">
+  <meta name="ticket:created" content="2026-10-10">
+  <meta name="ticket:updated" content="2026-10-10">
+  <link rel="stylesheet" href="../docs/assets/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <p class="eyebrow">Ticket</p>
+      <h1>T-001 可安装的 Workspace 替换纵向切片</h1>
+      <p class="summary">状态：doing / 优先级：P1 / 类型：feature / 分级：L — 跨四包、Host/Client Remote、动态入口与 profile 替换恢复链路。</p>
+    </header>
+
+    <section>
+      <h2>目标</h2>
+      <p>完成一条可真实安装的最薄链路：一个 bundle 在未修改的 DSH <code>0.2.1-alpha.2</code> 中停用官方 Workspace、激活替代 Workspace、挂载分组 Remote，并在项目树上方渲染真实的置顶区域；停用 bundle 并重启后恢复官方 Workspace。</p>
+    </section>
+
+    <section>
+      <h2>上下文</h2>
+      <p>这是 <a href="../docs/designs/D-001-workspace-replacement.html">D-001</a> 的 First Slice Check。它优先验证独立包构建、客户端动态入口、Typert Remote、自带 patch、精确版本 gate 和恢复路径，不在这一阶段完成全部拖放与 CRUD。</p>
+    </section>
+
+    <section>
+      <h2>验收标准</h2>
+      <ul>
+        <li>独立仓库可安装依赖并构建四个可发布包，产物不依赖 DSH checkout 内部路径。</li>
+        <li>Registry Client entry 自行通过 <code>ctx.remote.$mount()</code> 挂载生成 contribution，不修改官方 <code>api-remotes</code>。</li>
+        <li>bundle 精确绑定 DSH <code>0.2.1-alpha.2</code>，停用官方 <code>ui-workspace</code> 并激活替代入口。</li>
+        <li>在干净 profile 中可看到项目树前的置顶区域，官方当前目录发现和项目树仍可用。</li>
+        <li>停用 bundle 并重启后，官方 Workspace 恢复。</li>
+        <li>First Slice architecture review 无阻断项。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>关联设计</h2>
+      <p><a href="../docs/designs/D-001-workspace-replacement.html">D-001 可安装的 Workspace 替代与置顶分组</a></p>
+    </section>
+
+    <section>
+      <h2>下一步</h2>
+      <p>建立独立 workspace 和四包最小真实实现，构建 tarball 后在干净 DSH profile 执行安装、激活与恢复 smoke。</p>
+    </section>
+
+    <section>
+      <h2>验证</h2>
+      <ul>
+        <li>待记录 typecheck、unit、build、pack、clean-profile install/activate/recover 命令及结果。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>记录</h2>
+      <ul>
+        <li>2026-10-10：Doc Gate 通过后创建 ticket，开始 First Slice。</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

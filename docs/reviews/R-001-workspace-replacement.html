@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>R-001 Workspace 替代设计评审</title>
+  <meta name="review:id" content="R-001">
+  <meta name="review:status" content="resolved">
+  <meta name="review:ticket" content="none">
+  <meta name="review:design" content="D-001">
+  <meta name="review:created" content="2026-10-10">
+  <meta name="review:updated" content="2026-10-10">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <p class="eyebrow">Review</p>
+      <h1>R-001 Workspace 替代设计评审</h1>
+      <p class="summary">状态：resolved / 设计：<a href="../designs/D-001-workspace-replacement.html">D-001</a></p>
+    </header>
+    <section>
+      <h2>评审对象</h2>
+      <p><code>docs/designs/D-001-workspace-replacement.html</code>：独立 bundle、版本绑定 Workspace fork、置顶分组 Registry/UI、安装与维护方案。</p>
+    </section>
+    <section>
+      <h2>Round 1</h2>
+      <p><strong>Verdict：REQUEST_CHANGES</strong></p>
+      <ul>
+        <li><strong>Major：</strong>缺少 bundle 级精确 peer，无法保证 DSH 版本不匹配时在读取 patch 前拒绝整层。</li>
+        <li><strong>Major：</strong>设计把 Client HMR 的 disable+insert 当作原子回滚，但入口激活实际逐项执行，失败不会自动恢复官方 Workspace。</li>
+        <li><strong>Minor：</strong>YAML 行顺序不能保证 Client 入口依次激活，需要说明服务注入、slot 等待和卸载关系。</li>
+      </ul>
+      <h3>作者响应</h3>
+      <ul>
+        <li><strong>Fix：</strong>明确 bundle 自身声明 <code>@deepseek-ai/dsh: 0.2.1-alpha.2</code>，并增加“错误版本在读取 patch 前拒绝且官方 Workspace 保持启用”的 smoke。</li>
+        <li><strong>Fix：</strong>删除自动原子回滚表述，补充替代 Client 入口故障注入、可见失败以及停用 bundle 后重启恢复的路径。</li>
+        <li><strong>Fix：</strong>明确 Registry Remote、Workspace slot 与分组 UI 通过 Cordis injection 和 <code>slots.inject()</code> 协调，不依赖 YAML 激活顺序；补充相反方向的卸载要求。</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Round 2</h2>
+      <p><strong>Verdict：REQUEST_CHANGES</strong></p>
+      <ul>
+        <li><strong>Major：</strong>实现顺序先分别完成各包，到后段才验证 bundle 替换；第一步应是穿过安装、官方入口停用、替代入口激活和停用恢复的最薄纵向切片。</li>
+        <li><strong>Major：</strong>设计声称复用原生 Session 菜单和操作，但官方 <code>SessionNodeItem</code> 与菜单是内部组件，尚未定义独立分组行如何保持行为一致。</li>
+      </ul>
+      <h3>作者响应</h3>
+      <ul>
+        <li><strong>Fix：</strong>把四包最小构建、真实 bundle 安装、替代入口激活和停用重启恢复改为第一阶段，并把它作为 First Slice Check 的唯一评审对象。</li>
+        <li><strong>Fix：</strong>明确分组 UI 自有 <code>SessionGroupRow</code> 和菜单，不导入内部 Workspace 组件；打开、fork、归档和取消置顶调用公开 <code>UiWorkspace</code>，重命名通过 <code>ISessions.using(...).binding.session.rename</code>。该适配不扩大 Workspace fork 差异，并由菜单可见性和公开能力调用测试保证一致性。</li>
+      </ul>
+      <p><strong>下一步：验证轮</strong> — 两项 Major 均为局部设计说明与顺序修订，没有改变四包边界或数据所有权；派全新 reviewer 只验证这两项。</p>
+    </section>
+    <section>
+      <h2>Round 3（verification）</h2>
+      <p><strong>Verdict：PASS</strong></p>
+      <ul>
+        <li><strong>Resolved：</strong>第一阶段已经是穿过四包最小构建、干净 profile 安装、官方入口停用、替代入口激活和停用重启恢复的真实纵向切片。</li>
+        <li><strong>Resolved：</strong>分组 UI 自有 Session 行和菜单，操作通过公开 <code>UiWorkspace</code> 与 <code>ISessions.using</code> 完成；不依赖内部组件、不扩大 Workspace fork 差异，并有菜单与行为测试约束。</li>
+        <li><strong>Critical / Structural：</strong>无。</li>
+      </ul>
+      <h3>作者响应</h3>
+      <p><strong>Accept：</strong>两项 Major 均已解决。实现中 <code>ISessions.using</code> 的 source 参数固定为 <code>{ source: 'sessionGroupsOperation' }</code>，并保留对应 declaration merge。</p>
+      <p><strong>下一步：通过</strong> — Doc Gate 已收敛，无阻断项；设计状态改为 <code>approved</code>。</p>
+    </section>
+    <section>
+      <h2>Round 4（源码契约复核）</h2>
+      <p><strong>ARCH：SOUND</strong></p>
+      <p><strong>Verdict：REQUEST_CHANGES</strong></p>
+      <ul>
+        <li><strong>Major：</strong>公开 <code>UiWorkspace</code> 方法只执行 Host 操作；官方菜单还在 UI 层拥有 fork migration 拒绝与反馈、活跃 Session 的 stop-and-archive 确认、archived live guard 和 blank 行限制。若分组行只是直调四个方法，会与承诺的原生行为不一致。</li>
+      </ul>
+      <h3>作者响应</h3>
+      <p><strong>Fix：</strong>分组 UI 继续只调用公开能力，但在自身包中保留原生适配语义：fork 禁止隐式 migration 并处理 migration-required，archive 对 session-active 走二阶段确认，open 做 archived live guard，rename 持有 Session reference，blank 行无菜单且不可拖动；同时扩充精确参数、菜单、确认和失败保留测试。Workspace fork 不新增 action bridge。</p>
+      <p><strong>收敛检查：</strong>Round 3 已关闭前两项 Major；本轮来自更深入的上游源码契约核对，只补充同一 UI 包内的已存在责任，不增加实体、存储、包边界或 Workspace fork 文件，阻断项仍是一个局部可验证缺口，未触发结构升级。</p>
+      <p><strong>下一步：验证轮</strong> — 派全新 reviewer 只验证这些原生适配语义是否完整且仍保持最小 fork。</p>
+    </section>
+    <section>
+      <h2>Round 5（verification）</h2>
+      <p><strong>Verdict：PASS</strong></p>
+      <ul>
+        <li><strong>Resolved：</strong>open、fork、archive、unpin、rename 和 blank 行适配语义与 DSH <code>0.2.1-alpha.2</code> 的公开能力及菜单编排一致。</li>
+        <li><strong>Resolved：</strong>适配仍完全位于分组 UI 包，Workspace fork 只保留 slot 与 drag claim。</li>
+        <li><strong>Resolved：</strong>测试约束覆盖精确参数、live guard、二阶段归档、reference 生命周期、失败保留、菜单冒泡和 blank 行限制。</li>
+        <li><strong>Critical / Structural：</strong>无。</li>
+      </ul>
+      <h3>作者响应</h3>
+      <p><strong>Accept：</strong>Round 4 的 Major 已解决，Doc Gate 再次通过。</p>
+      <p><strong>下一步：通过</strong> — review 状态改为 <code>resolved</code>，设计状态改为 <code>approved</code>，进入 First Slice Check。</p>
+    </section>
+  </main>
+</body>
+</html>

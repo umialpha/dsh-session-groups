@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D-001 可安装的 Workspace 替代与置顶分组</title>
+  <meta name="design:id" content="D-001">
+  <meta name="design:status" content="approved">
+  <meta name="design:created" content="2026-10-10">
+  <meta name="design:updated" content="2026-10-10">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <p class="eyebrow">Design</p>
+      <h1>D-001 可安装的 Workspace 替代与置顶分组</h1>
+      <p class="summary">把跨项目 Session 置顶分组作为独立 DSH bundle 发布，在不修改用户 DSH 源码的前提下，将分组直接显示在原生项目树上方。</p>
+    </header>
+
+    <section>
+      <h2>摘要</h2>
+      <p>插件以一个可安装 bundle 交付。bundle 停用官方 <code>ui-workspace</code> 行，启用与指定 DSH 版本同步的最小 Workspace fork、Host 分组 Registry 和分组 UI。fork 保留官方 Workspace 的全部现有功能，只增加一个可选的根级子 slot 和 Session 拖放交接；分组 UI 填充该 slot。用户安装或移除 bundle 即可启用或恢复，不需要手工编辑源码或配置。</p>
+    </section>
+
+    <section>
+      <h2>目标</h2>
+      <ul>
+        <li>在展开的按项目分组 Workspace 视图中，把一个始终展开的“置顶”区域直接显示在项目列表上方。</li>
+        <li>未加入命名分组的置顶 Session 直接显示在标题下，不渲染“未分组”或“默认”标签。</li>
+        <li>支持创建、重命名、删除、折叠、手工排序命名分组，并在分组之间或分组内拖动 Session。</li>
+        <li>允许把任意项目中的未置顶 Session 直接拖到置顶默认层或命名分组；接受后先置顶，再保存分组位置。</li>
+        <li>保留 Session 的原项目、cwd、导航、原生菜单和原生置顶集合；分组仅是置顶集合上的布局。</li>
+        <li>用户只安装一个 bundle；发布版本不要求用户自己配置 Workspace 替换。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>非目标</h2>
+      <ul>
+        <li>不修改 DeepSeek Harness 官方源码、用户 profile 文件或官方包内容。</li>
+        <li>不创建新的 Workspace/项目实体，不改变当前目录发现逻辑，不移动 Session 数据。</li>
+        <li>不增加 tab、抽屉、独立主页面、嵌套分组、分组颜色、批量操作或跨用户共享。</li>
+        <li>不改变项目内部的原生置顶排序，也不移除项目树内原有的 Session 行。</li>
+        <li>首版不承诺兼容任意 DSH 版本，只支持显式列出的精确版本。</li>
+        <li>首版发布前不自动迁移早期源码实验产生的 <code>session_groups</code> 数据；新存储域从空布局开始。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>现状与约束</h2>
+      <p>DSH <code>0.2.1-alpha.2</code> 的官方 Workspace 包包含 24 个生产源码文件（约 6,769 行）和 12 个测试文件（约 8,536 行）。当前已验证的分组接入对 Workspace 本身只需要修改 3 个生产文件和 2 个测试文件，生产差异约 28 行；其余代码保持官方版本。官方包没有公开足以从外部重组整个 Workspace 树的稳定 slot，因此“不改源码且直接显示在项目树上方”只能通过版本绑定的 Workspace 替代插件完成。</p>
+      <p>DSH patch 中已有行的 <code>name</code> 是断言而不是重命名字段，所以 bundle 必须先按 id 停用官方行，再插入不同 id 的替代行。Client API 当前处于 pre-stable；替代包若与宿主版本漂移，可能破坏导航、搜索、目录选择或拖放，因此兼容范围必须精确。</p>
+    </section>
+
+    <section>
+      <h2>总体架构</h2>
+      <table>
+        <thead><tr><th>包</th><th>职责</th><th>来源</th></tr></thead>
+        <tbody>
+          <tr><td><code>@umialpha/dsh-client-ui-workspace-groups</code></td><td>替代官方 Workspace Client；维持 <code>ctx.uiWorkspace</code>、所有既有 slot/action/store 语义，增加分组子 slot 与拖放 claim。</td><td>官方 <code>ui-workspace</code> 精确版本镜像 + 最小补丁。</td></tr>
+          <tr><td><code>@umialpha/dsh-session-group-registry</code></td><td>Host 持久化、CAS Remote API、原生 pin 集合对账；Client 自行挂载生成的 <code>sessionGroups</code> Remote contribution。</td><td>现有实现移植并去除对官方 <code>api-remotes</code> 源码修改。</td></tr>
+          <tr><td><code>@umialpha/dsh-client-ui-session-groups</code></td><td>置顶区域、命名分组、菜单、拖放、乐观更新、本地化 Toast。</td><td>现有实现移植，类型依赖改为替代 Workspace 包。</td></tr>
+          <tr><td><code>@umialpha/dsh-session-groups</code></td><td>用户唯一安装入口；声明 bundle patch、精确兼容版本和前三个包的运行依赖。</td><td>新建。</td></tr>
+        </tbody>
+      </table>
+      <p>仓库采用 pnpm workspace，但发布为四个 npm 包。用户只安装 bundle 包，其余三个包由普通 <code>dependencies</code> 自动安装。开发演示可以链接 <code>packages/bundle</code>，链接 checkout 自带 workspace <code>node_modules</code>；社区发布走预构建 npm 包，避免要求用户授权 git dependency 的 <code>prepare</code> 脚本。</p>
+    </section>
+
+    <section>
+      <h2>Bundle 组合</h2>
+      <p>bundle 在 Web profile 的现有层之后应用以下 patch。YAML 顺序只定义配置行顺序，不承担 Client 激活时序；首次装载可能并发执行入口。Registry Client 依赖 <code>remote</code> 后挂载生成 contribution，分组 UI 依赖 <code>remote.sessionGroups</code>，并通过 <code>slots.inject()</code> 等待替代 Workspace 声明 slot，因此三者由 Cordis 服务依赖与 slot 生命周期协调。</p>
+      <pre><code>- id: ui-workspace
+  name: '@deepseek-ai/dsh-client-ui-workspace'
+  disabled: true
+
+- insert:
+    - id: session-group-registry
+      name: '@umialpha/dsh-session-group-registry'
+      config:
+        maxTitleBytes: 80
+
+    - id: ui-workspace-groups
+      name: '@umialpha/dsh-client-ui-workspace-groups'
+
+    - id: ui-session-groups
+      name: '@umialpha/dsh-client-ui-session-groups'</code></pre>
+      <p>bundle 自身必须声明 <code>peerDependencies["@deepseek-ai/dsh"] = "0.2.1-alpha.2"</code>。Profile 在读取 bundle layer 前检查这个 peer；版本不匹配时整层不会应用，官方 <code>ui-workspace</code> 保持启用。停用或移除兼容 bundle 后，该层不再生效，官方 Workspace 在重启或 HMR 成功应用配置后恢复。若更高优先级的用户 patch 重新启用官方行，诊断测试和 README 会明确提示不能同时运行两个 Workspace owner。</p>
+    </section>
+
+    <section>
+      <h2>Workspace fork 的最小差异</h2>
+      <ul>
+        <li>声明根级单占用 slot：<code>sidebar.workspaces.sessionGroups</code>。</li>
+        <li>仅在展开、按 Workspace 分组、非搜索视图中，于项目列表前渲染该 slot；空 slot 不增加 DOM。</li>
+        <li>向 slot owner 暴露当前 Session drag 的 <code>sessionId</code> 与同步 <code>claimDrop()</code>。分组区域接受 drop 后立即 claim，使原项目树不会继续提交 <code>setSessionOrder</code>。</li>
+        <li>保持服务名 <code>uiWorkspace</code>、持久化 store key、slot 名、action id、locale namespace、选择/排序/快捷键语义和公开类型兼容。</li>
+        <li>上游镜像文件保留 DeepSeek MIT 版权与许可声明；同步提交不混入分组功能以外的重构。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>用户交互</h2>
+      <ul>
+        <li>“置顶”标题采用 DSH Workspace 的中性行、现有 pin/group 图标、排版和间距；不使用突兀的整块强调色。</li>
+        <li>默认层 Session 直接排列在标题下，之后按手工顺序显示命名分组；分组行可折叠并提供重命名、删除与拖动操作。</li>
+        <li>删除分组不会取消置顶，其成员按原相对顺序追加到默认层。</li>
+        <li>拖动时仅高亮真实目标，不插入“拖到置顶区域”提示行，也不改变列表几何。</li>
+        <li>从项目树拖入的未置顶 Session 在接受 drop 后自动置顶；Session 仍同时显示在原项目中。</li>
+        <li>置顶区域内的非空 Session 保持原生打开、重命名、fork、归档和取消置顶行为；blank Session 可打开，但不显示菜单、时间或重命名入口，也不可拖动。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Session 行与原生操作适配</h2>
+      <p>官方 <code>SessionNodeItem</code>、行菜单和各 action entry 都是 <code>ui-workspace</code> 的内部呈现，不能由独立插件直接复用。分组 UI 因此拥有自己的 <code>SessionGroupRow</code>、菜单可见性和分组专属操作。Host 操作只通过公开能力完成：打开调用替代 Workspace 的 <code>UiWorkspace.openSession</code>，fork、归档和取消置顶分别调用 <code>forkSession</code>、<code>archiveSession</code> 和 <code>unpinSession</code>；重命名通过 <code>ISessions.using(sessionId, { source: 'sessionGroupsOperation' }, reference =&gt; reference.binding.session.rename(title))</code> 保持 Session reference 生命周期。分组菜单只组合这些公开能力与“移到默认层”，不会导入内部 <code>SessionNodeItem</code> 或 action component。</p>
+      <p>公开方法不包含原生菜单的全部 UI 编排，因此分组包负责保持对应语义：打开前实时检查 archived 状态；fork 显式传入 <code>{ allowMigration: false }</code>，并对 <code>session/migration-required</code> 显示可打开源 Session 的反馈；普通归档遇到 <code>workspace/session-active</code> 时打开 stop-and-archive 确认，确认后用 <code>{ stopActivity: true }</code> 重试；取消置顶失败保留原行，成功后刷新布局；重命名以持久标题而不是 fallback display title 作为草稿。短期成功/失败继续通过 app-wide Toast 报告，对话框内的字段错误留在原处。</p>
+      <p>这个适配全部位于 <code>@umialpha/dsh-client-ui-session-groups</code>，不要求 Workspace fork 再公开内部组件或增加 action bridge，因此 fork 差异仍限于根级 slot 和 drag claim。定向组件测试覆盖普通 Session、blank Session、默认层和命名分组四种菜单可见性，并断言 blank 行无菜单且不可拖动；行为测试覆盖 archived live guard、fork 的精确参数与 migration-required 反馈、活跃归档的二阶段确认、rename reference source/result、取消置顶对账、菜单不触发打开，以及所有操作的失败保留行为。</p>
+    </section>
+
+    <section>
+      <h2>数据与 Remote API</h2>
+      <p>官方 <code>WorkspaceRegistry.pinnedSessionIds</code> 是置顶成员资格的唯一权威。插件只持久化 <code>pinned_session_groups</code> storage-domain 全局值：</p>
+      <pre><code>interface SessionGroupsSnapshot {
+  revision: SessionGroupsRevision
+  defaultSessionIds: readonly SessionId[]
+  groups: readonly {
+    id: SessionGroupId
+    title: string
+    sessionIds: readonly SessionId[]
+  }[]
+}</code></pre>
+      <p>布局必须是当前 pin 快照的完整、无重复排列。对账会移除已取消置顶的 id，保留仍置顶项目的相对顺序，并把新置顶的 id 追加到默认层。所有 mutation 都携带调用方观察到的 <code>revision</code>；冲突返回权威快照，不覆盖新布局。</p>
+      <p><code>sessionGroups</code> Remote namespace 提供 <code>snapshot</code>、<code>create</code>、<code>rename</code>、<code>delete</code>、<code>insertGroupBefore</code> 和 <code>moveSession</code>。Registry Client entry 通过公开的 <code>ctx.remote.$mount()</code> 挂载生成 contribution，卸载时先撤销依赖它的 UI，再撤销 Remote；不修改官方 <code>@deepseek-ai/dsh-api-remotes</code>。</p>
+    </section>
+
+    <section>
+      <h2>一致性与失败处理</h2>
+      <ul>
+        <li><code>moveSession</code> 先调用幂等的原生 pin，再提交分组布局；两个存储域不伪装成原子事务。</li>
+        <li>pin 失败时两边都不改变。新 pin 成功但分组保存失败时，Session 保持置顶并出现在默认层，Toast 明确说明未加入目标分组。</li>
+        <li>已置顶 Session 的分组移动失败时恢复最后可信布局；revision conflict 直接安装 Host 返回的权威快照。</li>
+        <li>删除、重命名和移动失败时保留原数据与对话框；短期结果使用 app-wide Toast，字段校验留在对话框内。</li>
+        <li>插件卸载时停止接受新 mutation，等待已接受队列结束，再关闭 storage domain 和 Remote contribution。</li>
+        <li>Client HMR 不是跨入口事务：它会先撤销旧入口，再分别装载新入口，单个替代入口失败时不会自动恢复官方 Workspace。安装包通过预构建产物、pack 检查和激活 smoke 把这类故障挡在发布前；若仍发生，插件管理器必须显示失败，README 提供“停用 bundle 后重启 Web profile”的恢复命令。恢复后官方 Workspace 启用，分组 sidecar 数据保留。</li>
+        <li>卸载顺序不依赖 YAML 行顺序。分组 UI 对 <code>remote.sessionGroups</code> 和 Workspace slot 的注入先失效并撤销 UI；Registry Client 的 disposer 随后撤销 Remote；Host Registry 最后排空 mutation 并关闭 storage domain。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>版本与发布</h2>
+      <ul>
+        <li>首个开发版本为 <code>0.1.0</code>，仅支持 DSH <code>0.2.1-alpha.2</code>；bundle 自身对 <code>@deepseek-ai/dsh</code> 声明精确 peer，使 App Boot 在读取 patch 前拒绝不兼容整层；每个运行包也对直接使用的 <code>@deepseek-ai/dsh-*</code> peer 声明精确版本。</li>
+        <li><code>@deepseek-ai/cordis</code> 固定为与该 DSH 发行版相同的 <code>4.0.5-alpha.1</code>。</li>
+        <li>DSH 不匹配时安装/激活预检必须凭 bundle 级 <code>@deepseek-ai/dsh</code> peer 拒绝整个 bundle，并验证拒绝发生在读取 patch 之前，不能留下“官方 Workspace 已停用但替代包未加载”的半状态。</li>
+        <li>每次支持新 DSH 版本时，先导入对应官方 Workspace 原始树，再重放最小补丁并运行完整回归；单独发布对应插件版本。</li>
+        <li>发布前验证 npm 身份对 <code>@umialpha</code> scope 的权限。若无权限，在首次公共发布前整体更名；公共版本发布后不再更改 package identity。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>需要创建或移植的文件</h2>
+      <table>
+        <thead><tr><th>路径</th><th>变更</th><th>优先级</th></tr></thead>
+        <tbody>
+          <tr><td><code>package.json</code>、<code>pnpm-workspace.yaml</code>、TypeScript/Vitest 配置</td><td>独立 workspace、精确 engines/packageManager、统一脚本。</td><td>P1</td></tr>
+          <tr><td><code>packages/workspace/</code></td><td>复制官方 Workspace 包、许可证和完整测试，改包名并应用 3 文件最小补丁。</td><td>P1</td></tr>
+          <tr><td><code>packages/registry/</code></td><td>移植 Host Registry；增加独立 Client Remote mount 及生命周期测试。</td><td>P1</td></tr>
+          <tr><td><code>packages/ui/</code></td><td>移植分组 UI；改用替代 Workspace 类型与 inject 包名。</td><td>P1</td></tr>
+          <tr><td><code>packages/bundle/</code></td><td>组合 patch、精确 peer/version gate、安装元数据和 bundle 测试。</td><td>P1</td></tr>
+          <tr><td><code>tests/install/</code></td><td>干净 profile 的安装、启停、移除、版本不匹配与恢复 smoke。</td><td>P1</td></tr>
+          <tr><td><code>README.md</code>、<code>LICENSE</code>、<code>THIRD_PARTY_NOTICES.md</code></td><td>安装、兼容矩阵、上游同步说明和 MIT 归属。</td><td>P1</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>实现顺序</h2>
+      <ol>
+        <li>先做最薄纵向切片：建立四包最小 manifests 和可构建入口；替代 Workspace 仅保留官方实现与一个可观察的空分组 slot；Registry 和 UI 只提供可激活的最小入口；bundle 完成 disable+insert。把四个 tarball 安装到干净 DSH <code>0.2.1-alpha.2</code> profile，验证 bundle 可被接受、官方入口被停用、替代入口成功激活；再停用 bundle 并重启，验证官方 Workspace 恢复。First Slice Check 只评审这条真实链路。</li>
+        <li>在切片结构通过后，补齐 workspace manifests、MIT 许可、可重复的上游版本记录和独立构建 helper。</li>
+        <li>移植 Registry 完整 Host 行为，并让其 Client entry 自主挂载 Remote contribution。</li>
+        <li>同步官方 Workspace 完整包与测试，在切片已有替代入口上只补齐 slot/drag claim 差异。</li>
+        <li>移植分组 UI，改为依赖替代 Workspace 包和独立 Remote，并按“Session 行与原生操作适配”调用公开能力。</li>
+        <li>补齐 bundle 组合、错误版本、故障注入和恢复测试；运行 unit/typecheck/lint/build，打包四个 tarball，在干净 profile 做完整安装 smoke。</li>
+        <li>启动本地 Web profile，进行浅色/深色、拖放、重启持久化和原生行为视觉验收。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>测试方案</h2>
+      <ul>
+        <li>完整运行 fork 携带的官方 Workspace 测试，覆盖当前目录初始化、项目树、搜索、flat/grouped、目录选择、置顶、Session 操作、排序、快捷键和 rail 模式。</li>
+        <li>新增 slot 在正确位置/模式出现、空 slot 无 DOM、分组 claim 后不提交项目排序的定向测试。</li>
+        <li>Registry 覆盖 schema、CAS、对账、自动 pin、部分失败、重启、disposal 和独立 Client Remote mount。</li>
+        <li>UI 覆盖默认层、命名分组 CRUD/折叠/排序、Session 跨组移动、blank Session 菜单、乐观回滚、本地化与 Toast。</li>
+        <li>Bundle 测试验证官方行被停用、替代行只出现一次、包依赖完整；启动 smoke 还要验证错误 DSH 版本在读取 patch 前拒绝整层，且官方 Workspace 保持启用。</li>
+        <li>故障注入 smoke 删除或破坏一个替代 Client artifact，确认激活失败可见且不会被声称为自动回滚；随后停用 bundle 并重启，确认官方 Workspace 恢复、原生 pin 保留。</li>
+        <li>浏览器 E2E 从不同项目拖入未置顶 Session、重排、刷新并重启；确认原项目行、原生 pin 与默认 Workspace 行为未改变。</li>
+        <li><code>pnpm pack</code> 后在干净 DSH <code>0.2.1-alpha.2</code> Web profile 安装、启用、禁用和移除；Node 22.19 与 24 至少各跑一次构建/测试。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>风险与缓解</h2>
+      <table>
+        <thead><tr><th>风险</th><th>影响</th><th>缓解</th></tr></thead>
+        <tbody>
+          <tr><td>Workspace 上游高频变化</td><td>导航或交互回归。</td><td>精确版本、完整上游测试、保持最小 diff、每版同步记录。</td></tr>
+          <tr><td>两个 Workspace owner 同时激活</td><td>服务和单 slot 冲突。</td><td>一个 bundle layer 完成 disable+insert；组合测试；README 诊断更高优先级 patch。这里不把 Client HMR 描述为事务。</td></tr>
+          <tr><td>替代 Client 入口激活失败</td><td>当前页面缺少 Workspace，且 HMR 不自动回滚。</td><td>预构建与 pack/激活 smoke；可见失败；停用 bundle 并重启恢复官方 Workspace；保留 sidecar 与原生 pin 数据。</td></tr>
+          <tr><td>Remote 未挂载或先后顺序错误</td><td>分组 UI 无法启动。</td><td>Registry Client 独立挂载；UI 依赖 <code>remote.sessionGroups</code>；生命周期测试。</td></tr>
+          <tr><td>pin 与布局只完成一半</td><td>用户看到位置与操作结果不一致。</td><td>原生 pin 为权威、默认层回退、明确 Toast、启动对账。</td></tr>
+          <tr><td>社区包名或发布权限</td><td>无法按预定 scope 发布。</td><td>公共首发前验证 scope；必要时在零公共用户阶段整体更名。</td></tr>
+          <tr><td>复制上游代码的归属</td><td>许可证缺失。</td><td>保留 DeepSeek MIT LICENSE 与文件归属，提供 THIRD_PARTY_NOTICES。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>验收标准</h2>
+      <ul>
+        <li>在未修改的 DSH <code>0.2.1-alpha.2</code> 上，通过一个 bundle 安装并看到项目树上方的置顶分组。</li>
+        <li>当前目录默认 Workspace、项目发现、搜索、原生置顶与 Session 菜单的回归测试和手工检查均与官方行为一致。</li>
+        <li>可从任意项目拖动未置顶 Session 到默认层或命名分组，并在重启后保留布局。</li>
+        <li>禁用或移除 bundle 后官方 Workspace 恢复，持久化数据保留且不影响原生 pin。</li>
+        <li>不包含对 <code>deepseek-harness</code> checkout 的运行时修改，也不要求最终用户手改 patch。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>评审与关联 Tickets</h2>
+      <p>Doc Gate：<a href="../reviews/R-001-workspace-replacement.html">R-001</a>，三轮评审后通过。实现按 First Slice Check、完整实现和 MR Gate 拆分为独立 tickets。</p>
+    </section>
+  </main>
+</body>
+</html>

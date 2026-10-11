@@ -84,7 +84,7 @@ pnpm exec vitest run packages/client/ui-session-groups/tests
 node tests/install/session-groups.smoke.mjs --dsh-cli /absolute/path/to/dsh
 ```
 
-架构与发布约束见 [D-001](docs/designs/D-001-workspace-replacement.html)，当前完整实现任务见 [T-002](tickets/T-002-complete-session-groups.html)。
+当前完整实现任务与验证记录见 [T-002](tickets/T-002-complete-session-groups.html)。历史设计与评审材料可从 Git 历史查阅。
 
 ## 作者与反馈
 

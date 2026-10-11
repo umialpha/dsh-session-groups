@@ -10,7 +10,7 @@
   <meta name="ticket:type" content="feature">
   <meta name="ticket:level" content="L">
   <meta name="ticket:created" content="2026-10-10">
-  <meta name="ticket:updated" content="2026-10-10">
+  <meta name="ticket:updated" content="2026-10-11">
   <link rel="stylesheet" href="../docs/assets/style.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
 
     <section>
       <h2>上下文</h2>
-      <p>这是 <a href="../docs/designs/D-001-workspace-replacement.html">D-001</a> 的 First Slice Check。它优先验证独立包构建、客户端动态入口、Typert Remote、自带 patch、精确版本 gate 和恢复路径，不在这一阶段完成全部拖放与 CRUD。</p>
+      <p>这是历史设计 D-001 的 First Slice Check。它优先验证独立包构建、客户端动态入口、Typert Remote、自带 patch、精确版本 gate 和恢复路径，不在这一阶段完成全部拖放与 CRUD。</p>
     </section>
 
     <section>
@@ -44,8 +44,8 @@
     </section>
 
     <section>
-      <h2>关联设计</h2>
-      <p><a href="../docs/designs/D-001-workspace-replacement.html">D-001 可安装的 Workspace 替代与置顶分组</a></p>
+      <h2>历史设计与评审</h2>
+      <p>D-001 可安装的 Workspace 替代与置顶分组。历史设计与评审材料已从当前目录移除，可从 Git 历史查阅。</p>
     </section>
 
     <section>
@@ -60,7 +60,7 @@
         <li><code>pnpm exec vitest run ...</code>：Registry、Workspace fork 与 bundle 共 7 files / 118 tests 通过。</li>
         <li><code>pnpm run build</code>：Host、Client 与 Typert Remote 产物构建通过。</li>
         <li><code>node tests/install/session-groups.smoke.mjs --dsh-cli /tmp/dsh-session-groups-smoke.sDb06f/node_modules/.bin/dsh</code>：四包 pack、干净 DSH <code>0.2.1-alpha.2</code> 安装、Web 启动、bundle 移除和官方 Workspace 恢复通过。</li>
-        <li><a href="../docs/reviews/R-002-installable-slice.html">R-002</a>：<code>ARCH: SOUND / PASS</code>，无阻断项。</li>
+        <li>历史评审 R-002：<code>ARCH: SOUND / PASS</code>，无阻断项。</li>
       </ul>
     </section>
 
@@ -69,6 +69,7 @@
       <ul>
         <li>2026-10-10：Doc Gate 通过后创建 ticket，开始 First Slice。</li>
         <li>2026-10-10：完成 typecheck、118 项定向测试、build、pack 与干净 profile 安装恢复 smoke；First Slice architecture review 通过，状态改为 done。</li>
+        <li>2026-10-11：按用户要求移除设计与评审目录，清理对应链接；保留完成证据，历史材料可从 Git 历史查阅。</li>
       </ul>
     </section>
   </main>

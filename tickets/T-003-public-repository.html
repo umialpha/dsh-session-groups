@@ -39,8 +39,8 @@
       </ul>
     </section>
     <section>
-      <h2>关联设计</h2>
-      <p>无新增设计；已有实现见 <a href="../docs/designs/D-002-sidebar-sections.html">D-002</a>。</p>
+      <h2>历史设计</h2>
+      <p>无新增设计；已有实现采用历史设计 D-002。历史设计与评审材料已从当前目录移除，可从 Git 历史查阅。</p>
     </section>
     <section>
       <h2>下一步</h2>
@@ -57,11 +57,12 @@
         <li><code>git push --set-upstream origin HEAD:main</code>：成功；保留本地 codex/installable-slice，追踪 origin/main。</li>
         <li><code>gh repo edit umialpha/dsh-session-groups --default-branch main</code>：成功；GitHub API 确认仓库公开、默认分支 main，并具有 dsh-plugin 与 deepseek-harness topics。</li>
         <li>GitHub contents API 确认社区介绍草稿已在 main；<code>git status --short --branch</code> 确认首次推送后工作树干净。</li>
+        <li>2026-10-11 文档目录清理：Node 检查确认两个目录不存在、10 个文档的 24 个本地链接有效、三个 ticket 状态保持不变；<code>git diff --check</code> 通过，未改动插件代码。</li>
       </ul>
     </section>
     <section>
       <h2>记录</h2>
-      <ul><li>2026-10-11：用户确认作者和公开仓库准备范围，创建本任务。</li><li>2026-10-11：创建公开仓库，完成作者元数据、预览安装说明、英文介绍草稿、内容扫描和四包打包检查，准备推送 main。</li><li>2026-10-11：公开源码成功推送，默认分支与 topics 已通过 API 确认，状态改为 done；npm 和社区帖子不在本任务发布范围内。</li></ul>
+      <ul><li>2026-10-11：用户确认作者和公开仓库准备范围，创建本任务。</li><li>2026-10-11：创建公开仓库，完成作者元数据、预览安装说明、英文介绍草稿、内容扫描和四包打包检查，准备推送 main。</li><li>2026-10-11：公开源码成功推送，默认分支与 topics 已通过 API 确认，状态改为 done；npm 和社区帖子不在本任务发布范围内。</li><li>2026-10-11：按用户要求移除设计与评审目录，清理对应链接；保留公开仓库与发布材料的完成证据，历史材料可从 Git 历史查阅。</li></ul>
     </section>
   </main>
 </body>

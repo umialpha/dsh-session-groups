@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>T-004 社区预览发布与目录投稿</title>
+  <meta name="ticket:id" content="T-004">
+  <meta name="ticket:status" content="done">
+  <meta name="ticket:priority" content="P1">
+  <meta name="ticket:type" content="task">
+  <meta name="ticket:level" content="S">
+  <meta name="ticket:created" content="2026-10-11">
+  <meta name="ticket:updated" content="2026-10-11">
+  <link rel="stylesheet" href="../docs/assets/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <p class="eyebrow">Ticket</p>
+      <h1>T-004 社区预览发布与目录投稿</h1>
+      <p class="summary">状态：done / 优先级：P1 / 类型：task / 分级：S — 官方源码预览已发布，1024 目录投稿已审核并合并，不改插件行为。</p>
+    </header>
+    <section>
+      <h2>目标</h2>
+      <p>以 umialpha 身份在官方 Show Your Plugins! 分享源码预览，并在符合规则时提交到社区插件目录。</p>
+    </section>
+    <section>
+      <h2>上下文</h2>
+      <p>用户已授权发布到社区。公开仓库已准备好，但 npm whoami 返回 ENEEDAUTH，四包尚未公开发布，真实鼠标拖放仍待验收。因此帖子必须标明源码预览，不宣称 npm 安装版可用。</p>
+    </section>
+    <section>
+      <h2>验收标准</h2>
+      <ul>
+        <li>官方帖子位于 Show Your Plugins!，作者为 umialpha，内容与当前仓库及验证状态一致。</li>
+        <li>发帖前检查同名帖子以避免重复，发帖后通过 API 读取确认。</li>
+        <li>逐一核实社区目录的真实收录条件，只提交当前符合规则的条目；未满足条件时记录原因。</li>
+        <li>README、社区帖原文、任务列表与维护日志记录实际发布结果。</li>
+      </ul>
+    </section>
+    <section>
+      <h2>下一步</h2>
+      <p>用户完成 npm 登录与真实鼠标拖放验收后，继续 npm 发布和公开安装路径验证。另一 Awesome 目录要求仓库创建满一天（北京时间 2026-10-12 00:39:05）且可公开安装，当前不符合。本次社区预览发布已完成，未设置自动跟进。</p>
+    </section>
+    <section>
+      <h2>验证</h2>
+      <ul>
+        <li>GitHub GraphQL 已确认账号 umialpha、目标仓库与 Show Your Plugins! 分类；npm whoami 返回 ENEEDAUTH。</li>
+        <li>仓库创建时间为 2026-10-10 16:39:05 UTC（北京时间 2026-10-11 00:39:05）。</li>
+        <li>GitHub GraphQL 同名搜索无现有帖子；createDiscussion 成功，随后读取确认 <a href="https://github.com/deepseek-ai/deepseek-harness/discussions/9426">#9426</a> 的作者 umialpha、分类 Show Your Plugins! 和正文。</li>
+        <li>已阅读全文 1024 CONTRIBUTING.md、AGENTS.md、schema 与分类；该目录允许未发布 npm 的插件以仅浏览方式收录，无仓库满一天要求。</li>
+        <li>1024 的 validateCatalogEntry 与 loadCatalogEntries 检查通过：字段、文件名、分类、双语描述、日期和唯一性有效；仅提交一个 catalog JSON。</li>
+        <li><a href="https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/591">PR #591</a> 的 static-review 和 merge 均为 SUCCESS，状态 MERGED；GitHub contents API 确认新条目已存在于目录 main 分支。</li>
+        <li>另一 Awesome 目录要求满一天与公开安装；当前仅有四包本地 smoke，未验证公开安装路径，因此未投稿。</li>
+        <li>Node + GitHub GraphQL 验证：12 个文档、26 个本地链接、ticket 状态及已发帖正文与 community-post.md 一致性通过；已删除目录未重建。git diff --check 通过；插件实现未改动，未重复行为测试。</li>
+      </ul>
+    </section>
+    <section>
+      <h2>记录</h2>
+      <ul><li>2026-10-11：用户明确授权发布到社区，开始官方介绍和社区目录投稿检查。</li><li>2026-10-11：官方源码预览 #9426 发布并读取确认；1024 PR #591 通过静态审核后自动合并，已确认 main 中的条目，状态改为 done；npm 与真实拖放验收保持未完成。</li></ul>
+    </section>
+  </main>
+</body>
+</html>

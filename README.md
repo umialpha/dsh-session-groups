@@ -93,7 +93,7 @@ node tests/install/session-groups.smoke.mjs --public --dsh-cli /absolute/path/to
 
 作者：[`umialpha`](https://github.com/umialpha) · [roy236977634@gmail.com](mailto:roy236977634@gmail.com)。问题和建议请提交到 [GitHub Issues](https://github.com/umialpha/dsh-session-groups/issues)。
 
-社区预览已发布到官方 [Show Your Plugins!](https://github.com/deepseek-ai/deepseek-harness/discussions/9426)，原文见 [community-post.md](docs/community-post.md)。[1024 社区目录投稿 PR](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/591)已通过静态审核并合并；npm 发布已完成，目录网站的安装入口同步尚未核实。
+社区预览已发布到官方 [Show Your Plugins!](https://github.com/deepseek-ai/deepseek-harness/discussions/9426)，原文见 [community-post.md](docs/community-post.md)。[1024 社区目录初次投稿 PR](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/591)已合并；npm 发布后的[说明更新 PR #593](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/593)已通过静态审核，等待维护者合并。目录网站的安装入口同步尚未核实。
 
 ## 许可证
 

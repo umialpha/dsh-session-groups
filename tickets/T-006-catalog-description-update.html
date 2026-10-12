@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>T-006 社区目录发布说明更新</title>
+  <meta name="ticket:id" content="T-006">
+  <meta name="ticket:status" content="review">
+  <meta name="ticket:priority" content="P2">
+  <meta name="ticket:type" content="task">
+  <meta name="ticket:level" content="S">
+  <meta name="ticket:created" content="2026-10-12">
+  <meta name="ticket:updated" content="2026-10-12">
+  <link rel="stylesheet" href="../docs/assets/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <p class="eyebrow">Ticket</p>
+      <h1>T-006 社区目录发布说明更新</h1>
+      <p class="summary">状态：review / 优先级：P2 / 类型：task / 分级：S — 仅更新已收录条目的中英文说明，不改插件行为；静态审核通过，等待维护者合并。</p>
+    </header>
+    <section><h2>目标</h2><p>将 1024 社区目录中的“npm 尚未发布”改为 0.1.0 已公开发布，保留精确兼容版本和真实鼠标拖放待验收说明。</p></section>
+    <section><h2>上下文</h2><p>用户已授权更新说明。官方 Discussion #9426 已由 T-005 同步安装入口；1024 初次投稿 #591 的条目仍是源码预览说明。目录规则允许更新已有条目，但通过静态检查后仍须维护者手动合并。</p></section>
+    <section><h2>验收标准</h2><ul>
+      <li>更新 PR 只修改 catalog/plugins/umialpha--dsh-session-groups.json 的 description.en 和 description.zh。</li>
+      <li>中英文说明对应，标明 @umialpha/dsh-session-groups@0.1.0 已发布，公开安装、移除和恢复通过 smoke 验证；保留 alpha、DSH 0.2.1-alpha.2 和拖放待验收限制。</li>
+      <li>目录字段、分类、日期、唯一性检查和 GitHub 静态审核通过。</li>
+      <li>维护者合并后读取 main 条目确认新说明；未合并前不宣称线上目录已更新。</li>
+    </ul></section>
+    <section><h2>当前结果</h2><p><a href="https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/593">PR #593</a> 已以 umialpha 提交，static-review 为 SUCCESS，merge 为 SKIPPED，状态 OPEN。PR 原文见 <a href="../docs/catalog-update.md">catalog-update.md</a>。原 id、名称、仓库、分类和 added 日期均未改变。</p></section>
+    <section><h2>下一步</h2><p>等待目录维护者审核合并，届时确认 main 中的新说明。目录网站的安装入口同步尚未核实；未设置自动跟进。T-002 的真实鼠标拖放验收仍未完成。</p></section>
+    <section><h2>验证</h2><ul>
+      <li>在 upstream main 的临时 clone 中以 Node 调用 validateCatalogEntry、readCategories 和 loadCatalogEntries：767 个条目校验通过，全部 id 唯一。</li>
+      <li>Node 比对 git show HEAD 中的原 JSON 与新文件：除 description 外字段完全一致，git diff --name-only 仅包含一个目录 JSON；git diff --cached --check 通过。</li>
+      <li>gh pr view 593 --repo imsai-sh/awesome-deepseek-harness-plugins --json url,state,author,headRefOid,files,statusCheckRollup,isDraft：作者 umialpha、非 draft、一个 MODIFIED 文件；head 为 f17bb0313f4b4bbccdc2c33e11db1fe5f3960a05，static-review SUCCESS。</li>
+      <li>gh pr checks 593 --repo imsai-sh/awesome-deepseek-harness-plugins --watch --interval 10：static-review 通过，merge 跳过；已有条目更新不自动合并。</li>
+      <li>Node + GitHub API 读取确认：PR 正文与 docs/catalog-update.md 一致，head revision 中的目录 JSON 与本地提交逐字节一致；PR 状态仍为 OPEN。</li>
+      <li>Node 检查 15 个文档、38 个本地链接及 6 个工单的状态和日期与索引一致性通过；未重建设计或评审目录，常见凭据扫描无候选，git diff --cached --check 通过。</li>
+      <li>插件行为未改变，不重复运行已通过的实现测试；公开安装证据保留在 <a href="T-005-npm-publication.html">T-005</a>。</li>
+    </ul></section>
+    <section><h2>记录</h2><ul><li>2026-10-12：用户授权更新社区说明；仅改目录双语描述，提交 PR #593 并确认静态审核通过。状态为 review，等待维护者合并。</li></ul></section>
+  </main>
+</body>
+</html>

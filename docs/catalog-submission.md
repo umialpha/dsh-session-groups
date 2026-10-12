@@ -1,3 +1,5 @@
+历史投稿正文：2026-10-11 的 [PR #591](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/591)。npm 发布后的说明更新见 [catalog-update.md](catalog-update.md)。
+
 ## Plugin
 
 [umialpha/dsh-session-groups](https://github.com/umialpha/dsh-session-groups) adds collapsible cross-project pinned Session groups alongside Workspace in the DSH Web sidebar. Grouping reuses native pins and does not change Session project ownership or `cwd`.

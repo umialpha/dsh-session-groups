@@ -1,6 +1,6 @@
 # Alpha preview: DSH Session Groups — cross-project pinned groups in the Web sidebar
 
-This is a source preview, not an npm release. The four plugin packages have not been published to npm yet.
+Version `0.1.0` is now available on public npm as an alpha preview. Install [@umialpha/dsh-session-groups](https://www.npmjs.com/package/@umialpha/dsh-session-groups); its three supporting packages are installed automatically.
 
 I’m building [DSH Session Groups](https://github.com/umialpha/dsh-session-groups), an independently installable plugin for the DeepSeek Harness Web profile. It adds cross-project organization to native pinned Sessions without changing DSH source code.
 
@@ -22,9 +22,26 @@ Plugin `0.1.0` supports only DeepSeek Harness `0.2.1-alpha.2` and Cordis `4.0.5-
 
 ## Release status
 
-Source, screenshots, build instructions and planned installation commands are available in the [README](https://github.com/umialpha/dsh-session-groups#readme). The planned `dsh plugin add` command is not usable until the npm packages are published. The current local install smoke uses four tarballs in an isolated test profile; it is not a public npm installation.
+All four `0.1.0` packages are publicly downloadable, and their contents and integrity hashes match the release tarballs. Installation, activation, Web startup, removal and official Workspace recovery have passed using an unmodified official DSH CLI and a fresh test profile, with isolated npm/pnpm authentication settings and no local package overrides. This does not replace real mouse drag-and-drop acceptance, which is still pending.
 
-After publication, users will install only the bundle; its other three packages will be installed automatically. When running DSH Web, open the full authenticated URL printed by `dsh web`.
+## Installation
+
+```sh
+npm install -g @deepseek-ai/dsh@0.2.1-alpha.2
+dsh plugin --profile web add @umialpha/dsh-session-groups@0.1.0 --registry=https://registry.npmjs.org/
+dsh web
+```
+
+The explicit registry applies only to this installation and avoids a 404 while npm mirrors catch up. When running DSH Web, open the full authenticated URL printed by `dsh web`.
+
+To remove the plugin and restore the official Workspace:
+
+```sh
+dsh plugin --profile web remove @umialpha/dsh-session-groups
+dsh web
+```
+
+Source, screenshots, build instructions and limitations are available in the [README](https://github.com/umialpha/dsh-session-groups#readme).
 
 The project is MIT licensed. Its Workspace derivative retains DeepSeek’s MIT license and copyright; see [third-party notices](https://github.com/umialpha/dsh-session-groups/blob/main/THIRD_PARTY_NOTICES.md).
 

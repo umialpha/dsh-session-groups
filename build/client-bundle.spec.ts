@@ -43,7 +43,7 @@ describe('client bundle', () => {
 })
 
 describe('CSS Modules', () => {
-  it('watches, compiles, and injects the physical stylesheet', async () => {
+  it('uses relative module ids while watching, compiling, and injecting the physical stylesheet', async () => {
     const root = await mkdtemp(join(tmpdir(), 'dsh-session-groups-css-'))
     try {
       const stylesheet = join(root, 'Fixture.module.css')
@@ -59,6 +59,7 @@ describe('CSS Modules', () => {
       }
       const virtualId = plugin.resolveId('./Fixture.module.css', join(root, 'index.ts'))
       if (typeof virtualId !== 'string') throw new Error('CSS Modules virtual id missing')
+      expect(virtualId).not.toMatch(/css:(?:\/|[A-Za-z]:[\\/])/)
       const watched: string[] = []
       const output = await plugin.load.call(
         { addWatchFile: file => watched.push(file) },

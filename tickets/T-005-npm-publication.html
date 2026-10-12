@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>T-005 npm 预览版发布</title>
+  <meta name="ticket:id" content="T-005">
+  <meta name="ticket:status" content="done">
+  <meta name="ticket:priority" content="P1">
+  <meta name="ticket:type" content="task">
+  <meta name="ticket:level" content="S">
+  <meta name="ticket:created" content="2026-10-11">
+  <meta name="ticket:updated" content="2026-10-12">
+  <link rel="stylesheet" href="../docs/assets/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <p class="eyebrow">Ticket</p>
+      <h1>T-005 npm 预览版发布</h1>
+      <p class="summary">状态：done / 优先级：P1 / 类型：task / 分级：S — 发布既有实现，清理构建注释和安装说明，不改变产品行为。</p>
+    </header>
+    <section><h2>目标</h2><p>将四个 @umialpha 包的 0.1.0 发布到公共 npm，验证用户仅安装 bundle 即可启用，并能移除恢复官方 Workspace。</p></section>
+    <section><h2>上下文</h2><p>用户已授权继续 npm 发布。兼容版本保持 DSH 0.2.1-alpha.2 / Cordis 4.0.5-alpha.1。使用 pnpm pack 生成依赖已转换的 tarball 发布；T-002 真实鼠标拖放仍待验收，不因发布关闭。</p></section>
+    <section><h2>验收标准</h2><ul>
+      <li>四包的 0.1.0 可从公共 npm 查询和下载，发布身份有 @umialpha 权限。</li>
+      <li>最终 tarball 不含 workspace:* 依赖、凭据、本机绝对路径或缺失的 exports 文件。</li>
+      <li>全新 DSH_HOME 不使用本地 overrides，仅通过公共 npm 安装 bundle；启用、启动、移除和恢复检查通过。</li>
+      <li>仓库和社区安装说明根据实际结果更新，不提前宣称公开安装成功。</li>
+    </ul></section>
+    <section><h2>发布结果</h2><p>四个包的 0.1.0 和 latest 均已公开：@umialpha/dsh-session-group-registry、@umialpha/dsh-client-ui-workspace-groups、@umialpha/dsh-client-ui-session-groups、<a href="https://www.npmjs.com/package/@umialpha/dsh-session-groups">@umialpha/dsh-session-groups</a>。用户只安装 bundle；公开安装与恢复验证通过，<a href="https://github.com/deepseek-ai/deepseek-harness/discussions/9426">官方社区原帖</a>已更新并读取确认。</p></section>
+    <section><h2>下一步</h2><p>发布工作已完成。T-002 保持 review，等待真实鼠标拖放验收；社区目录网站的安装入口同步尚未核实。不重复发布已存在版本，不自动修改账号安全设置或创建 bypass token。</p></section>
+    <section><h2>验证</h2><ul>
+      <li>最初 npm whoami 返回 ENEEDAUTH；重新完成 npm login --auth-type=web 后，npm whoami --registry https://registry.npmjs.org/ --fetch-retries=0 --fetch-timeout=10000 返回 umialpha。</li>
+      <li>既有四份 tarball 的作者、MIT 许可、public 配置、exports 目标和内部依赖 0.1.0 检查通过；payload 与 sourcemap 扫描未发现常见凭据候选。</li>
+      <li>pnpm exec vitest run build/client-bundle.spec.ts：3/3 通过，包含相对 CSS 模块 id 与物理文件编译检查；pnpm exec oxlint build/client-bundle.ts build/client-bundle.spec.ts 通过。</li>
+      <li>pnpm run build:client 通过；四个 package 分别执行 pnpm --dir &lt;package&gt; pack --pack-destination &lt;temporary-directory&gt; 均成功。</li>
+      <li>最终四份 tarball 共 72 文件，25 个 exports 目标全部存在；内部依赖均为精确 0.1.0，六处 CSS 虚拟模块注释改为相对路径；payload 与 sourcemap 未发现本机绝对路径或常见凭据候选。包内 README 保留真实拖放待验收说明。</li>
+      <li>四包执行 npm view &lt;package&gt;@0.1.0 version --registry https://registry.npmjs.org/ --fetch-retries=0 --fetch-timeout=10000 均返回 E404，未在公共源查询到版本；认证后仍需确认 scope 权限。</li>
+      <li>Node 检查六份 ticket / 索引的本地链接与状态一致性通过；git diff --check 通过。</li>
+      <li>npm publish &lt;registry-tarball&gt; --access public --tag latest --registry https://registry.npmjs.org/ 返回 E403：要求 Two-factor authentication 或具备 bypass 2FA 的 granular token。随后 npm view registry@0.1.0 仍为 E404；未成功发布任何包。</li>
+      <li>npm profile get --json 仅选取 name 与 tfa 字段确认：name 为 umialpha，tfa 为 false。未读取或输出 token。</li>
+      <li>用户启用 2FA 后重新读取选定字段：name 为 umialpha，tfa 为 {pending: null, mode: auth-and-writes}；再次发布已进入 npm 官方网页授权流程，尚未返回发布成功。</li>
+      <li>在独立临时目录执行 npm install --prefix &lt;temporary-cli-directory&gt; --no-save --package-lock=false --registry https://registry.npmjs.org/ --no-audit --no-fund @deepseek-ai/dsh@0.2.1-alpha.2 成功，563 packages；读取 CLI manifest 确认版本。</li>
+      <li>安装 smoke 新增 --public 模式：跳过本地打包和 file overrides，复用配置、启动与移除恢复断言。node --check tests/install/session-groups.smoke.mjs 与 pnpm exec oxlint tests/install/session-groups.smoke.mjs 通过；公开插件安装因发布受阻尚未执行。</li>
+      <li>2026-10-12：npm view @umialpha/dsh-session-group-registry@0.1.0 version dist.integrity --json --registry https://registry.npmjs.org/ --fetch-retries=0 --fetch-timeout=10000 确认 0.1.0 已发布，sha512 完整性与本地最终 tarball 基线一致。</li>
+      <li>2026-10-12：另外三包使用相同 npm view 命令查询仍返回 E404；npm whoami 返回 E401。已重新启动 npm login --auth-type=web，未重复发布 registry，公开 bundle 安装仍不可用。</li>
+      <li>2026-10-12：重新完成 npm CLI 网页授权后，npm whoami 确认 umialpha。分别对两个 UI tarball 执行 npm publish --access public --tag latest --registry https://registry.npmjs.org/，均退出 0 并输出 + &lt;package&gt;@0.1.0；npm 明示正在后台处理。紧随查询仍为 E404，暂不声称公开下载与安装已通过。</li>
+      <li>2026-10-12：bundle tarball 执行 npm publish --access public --tag latest --registry https://registry.npmjs.org/ 退出 0，输出 + @umialpha/dsh-session-groups@0.1.0。等待传播后，四包公共 metadata 与 canonical tarball 均为 HTTP 200，latest 均为 0.1.0；匿名下载的 bytes、SHA-1 与 SHA-512 均匹配本地最终 tarball 和 registry 声明。bundle 发布时间为 2026-10-12T04:06:11.773Z。</li>
+      <li>2026-10-12：首次公开 smoke 因本机 npmmirror 尚未同步返回 404；改用显式 --registry=https://registry.npmjs.org/。公开模式进一步隔离 pnpm 11 的 XDG_CONFIG_HOME、认证配置和继承的 npm/pnpm 配置环境变量，不读取或修改用户凭据。pnpm remove 不接受 --registry，因此只在 add 时传入该参数。</li>
+      <li>2026-10-12：node tests/install/session-groups.smoke.mjs --public --dsh-cli /tmp/dsh-session-groups-public-smoke.DvGRR3/cli/node_modules/.bin/dsh --keep 通过，输出 install smoke passed。使用独立公共 npm CLI、全新 DSH_HOME 和无本地 overrides 的四包安装；确认四包版本 0.1.0、官方 Workspace 停用和三插件装配、Web 启动且认证 URL 返回 303、移除后官方 Workspace 恢复并再次启动。保留证据目录 dsh-session-groups-install-b68qgX。</li>
+      <li>2026-10-12：最终 node --check tests/install/session-groups.smoke.mjs 与 pnpm exec oxlint build/client-bundle.ts build/client-bundle.spec.ts tests/install/session-groups.smoke.mjs 通过。</li>
+      <li>2026-10-12：更新官方 Discussion #9426 前确认远端正文与 HEAD 中的原文一致，更新后 GraphQL 读取确认全文与 docs/community-post.md 一致；未重复发帖或目录投稿。</li>
+      <li>2026-10-12：Node 检查文档本地链接、ticket 状态和日期与索引一致性通过；当前安装说明无未发布遗留，未重建设计或评审目录，授权 URL 和常见凭据模式扫描无候选；git diff --cached --check 通过。</li>
+    </ul></section>
+    <section><h2>记录</h2><ul><li>2026-10-11：开始 npm 发布准备；认证尚未完成，未执行 npm publish，状态为 blocked。</li><li>2026-10-11：构建 helper 定向测试、lint、Client 构建、四包重新打包及最终 payload 审查通过；仍等待用户完成官方网页登录。</li><li>2026-10-11：重新完成 CLI 网页授权并确认账号 umialpha；首次 registry 发布被 E403 拒绝，读取确认账号 2FA 未启用，未有包发布成功。独立公共 DSH CLI 与公开安装 smoke 已准备好，等待用户开启 2FA。</li><li>2026-10-11：确认用户已开启 auth-and-writes 2FA；重试 registry 发布已触发官方网页授权，等待用户批准本次操作。</li><li>2026-10-12：用户报告第一个包发布成功；公共源确认 registry 0.1.0 和完整性基线，进度为 1/4。CLI 凭证不再有效，重新启动登录授权；其余包与公开安装验证尚未完成。</li><li>2026-10-12：恢复 CLI 登录后，两个 UI 包均发布请求成功，进度 3/4；等待 npm 后台处理完成再发布 bundle。状态改为 doing，公开安装验证仍待完成。</li><li>2026-10-12：bundle 发布成功，进度 4/4；四包公共下载与完整性核验、隔离公开安装 smoke 通过。仓库说明和官方社区原帖同步 npm 安装入口，T-005 改为 done；T-002 保持 review。</li></ul></section>
+  </main>
+</body>
+</html>

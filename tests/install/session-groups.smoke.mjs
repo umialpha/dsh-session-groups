@@ -8,10 +8,11 @@ import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const dshCli = cliOption('--dsh-cli')
+const publicInstall = process.argv.includes('--public')
 const keep = process.argv.includes('--keep')
 
 if (dshCli === undefined) {
-  throw new Error('usage: node tests/install/session-groups.smoke.mjs --dsh-cli /absolute/path/to/dsh [--keep]')
+  throw new Error('usage: node tests/install/session-groups.smoke.mjs --dsh-cli /absolute/path/to/dsh [--public] [--keep]')
 }
 
 await access(dshCli, constants.X_OK)
@@ -20,7 +21,10 @@ const tempRoot = await mkdtemp(join(tmpdir(), 'dsh-session-groups-install-'))
 const packDir = join(tempRoot, 'packs')
 const dshHome = join(tempRoot, 'home')
 const profileDir = join(dshHome, 'profiles', 'web')
-await mkdir(packDir)
+const userConfig = join(tempRoot, 'public-user.npmrc')
+const globalConfig = join(tempRoot, 'public-global.npmrc')
+const cwd = publicInstall ? tempRoot : repoRoot
+if (!publicInstall) await mkdir(packDir)
 
 const packages = [
   ['packages/client/ui-workspace-groups', 'umialpha-dsh-client-ui-workspace-groups-0.1.0.tgz'],
@@ -29,42 +33,65 @@ const packages = [
   ['packages/bundle/session-groups', 'umialpha-dsh-session-groups-0.1.0.tgz'],
 ]
 
-const env = { ...process.env, DSH_HOME: dshHome }
+const parentEnv = publicInstall
+  ? Object.fromEntries(Object.entries(process.env).filter(([name]) =>
+    !/^(npm|pnpm)_config_/i.test(name) && name !== 'NPM_TOKEN' && name !== 'NODE_AUTH_TOKEN'))
+  : process.env
+const env = {
+  ...parentEnv,
+  DSH_HOME: dshHome,
+  ...(publicInstall ? {
+    XDG_CONFIG_HOME: join(tempRoot, 'pnpm-config'),
+    PNPM_CONFIG_NPMRC_AUTH_FILE: userConfig,
+    npm_config_userconfig: userConfig,
+    npm_config_globalconfig: globalConfig,
+  } : {}),
+}
+const registryArgs = publicInstall ? ['--registry=https://registry.npmjs.org/'] : []
 
 try {
-  await run('pnpm', ['run', 'build'], { cwd: repoRoot })
-  for (const [directory] of packages) {
-    await run('pnpm', ['--dir', directory, 'pack', '--pack-destination', packDir], { cwd: repoRoot })
+  if (publicInstall) {
+    await appendFile(userConfig, '')
+    await appendFile(globalConfig, '')
+  }
+  if (!publicInstall) {
+    await run('pnpm', ['run', 'build'], { cwd: repoRoot })
+    for (const [directory] of packages) {
+      await run('pnpm', ['--dir', directory, 'pack', '--pack-destination', packDir], { cwd: repoRoot })
+    }
   }
 
   const [workspaceTarball, registryTarball, uiTarball, bundleTarball] = packages
     .map(([, filename]) => join(packDir, filename))
-  await run(dshCli, ['web', '--dump-config'], { cwd: repoRoot, env })
+  await run(dshCli, ['web', '--dump-config'], { cwd, env })
 
-  await appendFile(join(profileDir, 'pnpm-workspace.yaml'), [
-    '',
-    '# Resolve unpublished package dependencies from the tarballs under test.',
-    'overrides:',
-    `  '@umialpha/dsh-client-ui-session-groups@0.1.0': file:${uiTarball}`,
-    `  '@umialpha/dsh-client-ui-workspace-groups@0.1.0': file:${workspaceTarball}`,
-    `  '@umialpha/dsh-session-group-registry@0.1.0': file:${registryTarball}`,
-    '',
-  ].join('\n'))
+  if (!publicInstall) {
+    await appendFile(join(profileDir, 'pnpm-workspace.yaml'), [
+      '',
+      '# Resolve unpublished package dependencies from the tarballs under test.',
+      'overrides:',
+      `  '@umialpha/dsh-client-ui-session-groups@0.1.0': file:${uiTarball}`,
+      `  '@umialpha/dsh-client-ui-workspace-groups@0.1.0': file:${workspaceTarball}`,
+      `  '@umialpha/dsh-session-group-registry@0.1.0': file:${registryTarball}`,
+      '',
+    ].join('\n'))
+  }
 
-  await run(dshCli, ['plugin', '--profile', 'web', 'add', bundleTarball], { cwd: repoRoot, env })
+  const bundleSpecifier = publicInstall ? '@umialpha/dsh-session-groups@0.1.0' : bundleTarball
+  await run(dshCli, ['plugin', '--profile', 'web', 'add', bundleSpecifier, ...registryArgs], { cwd, env })
   await assertInstalledPackages(profileDir)
 
-  const enabled = await run(dshCli, ['web', '--dump-config'], { cwd: repoRoot, env })
+  const enabled = await run(dshCli, ['web', '--dump-config'], { cwd, env })
   assertEnabledConfig(enabled.stdout)
-  await startAndStopWeb(dshCli, repoRoot, env)
+  await startAndStopWeb(dshCli, cwd, env)
 
   await run(dshCli, ['plugin', '--profile', 'web', 'remove', '@umialpha/dsh-session-groups'], {
-    cwd: repoRoot,
+    cwd,
     env,
   })
-  const recovered = await run(dshCli, ['web', '--dump-config'], { cwd: repoRoot, env })
+  const recovered = await run(dshCli, ['web', '--dump-config'], { cwd, env })
   assertRecoveredConfig(recovered.stdout)
-  await startAndStopWeb(dshCli, repoRoot, env)
+  await startAndStopWeb(dshCli, cwd, env)
 
   process.stdout.write(`install smoke passed: ${tempRoot}\n`)
 } finally {

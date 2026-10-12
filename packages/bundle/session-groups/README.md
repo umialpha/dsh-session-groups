@@ -8,15 +8,17 @@
 
 ## 安装
 
-当前为源码预览，尚未发布到 npm。以下命令仅在四个插件包发布后可用；不要使用 DSH 的默认 `latest` 版本代替兼容的 alpha 版本。
+版本 `0.1.0` 为 npm 预览版。只使用下方兼容的 DSH alpha 版本，不要用 DSH 的默认 `latest` 版本替代。
+
+自动化回归与本地打包安装已通过；真实鼠标拖入置顶、组间移动及拖放排序仍待验收，不作为已通过的浏览器能力宣传。
 
 ```sh
 npm install -g @deepseek-ai/dsh@0.2.1-alpha.2
-dsh plugin --profile web add @umialpha/dsh-session-groups@0.1.0
+dsh plugin --profile web add @umialpha/dsh-session-groups@0.1.0 --registry=https://registry.npmjs.org/
 dsh web
 ```
 
-用户不需要修改 DSH 源码或 profile 配置。请打开当前 `dsh web` 输出的完整认证 URL。
+用户不需要修改 DSH 源码或 profile 配置。安装命令仅对本次操作指定 npm 官方源，避免镜像尚未同步新包时返回 404。请打开当前 `dsh web` 输出的完整认证 URL。
 
 ## 移除与恢复
 

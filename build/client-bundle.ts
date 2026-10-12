@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { basename, dirname, isAbsolute, resolve, sep } from 'node:path'
+import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { transform } from 'lightningcss'
 import type { TsdownPlugin, UserConfig } from 'tsdown'
 import { nodeBundle } from './node-bundle.ts'
@@ -165,15 +165,18 @@ function moduleTablePlugin(moduleTable: ReadonlySet<string>): TsdownPlugin {
 
 /** Compile CSS Modules into a class map and an idempotent style injection. */
 function cssModulesPlugin(id: string): TsdownPlugin {
+  const sourceRoot = process.cwd()
   return {
     name: 'dsh-session-groups-css-modules',
     resolveId(source: string, importer: string | undefined) {
       if (!source.endsWith('.module.css') || importer === undefined) return null
-      return CSS_VIRTUAL_PREFIX + sourceAssetPath(source, importer) + CSS_VIRTUAL_SUFFIX
+      const fileId = sourceAssetPath(source, importer)
+      const modulePath = relative(sourceRoot, fileId).split(sep).join('/')
+      return CSS_VIRTUAL_PREFIX + modulePath + CSS_VIRTUAL_SUFFIX
     },
     async load(virtualId: string) {
       if (!virtualId.startsWith(CSS_VIRTUAL_PREFIX)) return null
-      const fileId = virtualId.slice(CSS_VIRTUAL_PREFIX.length, -CSS_VIRTUAL_SUFFIX.length)
+      const fileId = resolve(sourceRoot, virtualId.slice(CSS_VIRTUAL_PREFIX.length, -CSS_VIRTUAL_SUFFIX.length))
       this.addWatchFile(fileId)
       const source = await readFile(fileId)
       const result = transform({

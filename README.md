@@ -4,7 +4,7 @@ DSH Session Groups 是一个独立安装的 DeepSeek Harness Web 插件。在不
 
 ## 预览状态
 
-当前公开的是 alpha 预览源码，四个 `@umialpha` 包尚未发布到 npm。下方 npm 安装命令仅供发布后使用，现在执行会找不到插件包。自动化测试和本地打包安装已通过；真实鼠标拖入置顶、组间移动及拖放排序仍待验收，不作为已通过的浏览器能力宣传。
+版本 `0.1.0` 已发布到公共 npm，用户只需安装 [@umialpha/dsh-session-groups](https://www.npmjs.com/package/@umialpha/dsh-session-groups)。四包下载完整性、全新 profile 的公开安装、启动、移除和官方 Workspace 恢复验证已通过。当前仍为 alpha 预览；真实鼠标拖入置顶、组间移动及拖放排序仍待验收，不作为已通过的浏览器能力宣传。
 
 ![置顶与工作区同级显示的浅色预览](docs/screenshots/D-002-sidebar-light.jpg)
 
@@ -31,19 +31,19 @@ DSH Session Groups 是一个独立安装的 DeepSeek Harness Web 插件。在不
 
 DSH 的 npm `latest` 当前为 `0.2.0-rc.2`，不在支持范围内；请显式使用上表 alpha 版本，不要只安装未指定版本的 `@deepseek-ai/dsh`。
 
-## 安装（插件发布到 npm 后）
+## 安装
 
-发布到 npm 后，只安装 bundle；另外三个运行包会作为依赖自动安装：
+只安装 bundle；另外三个运行包会作为依赖自动安装：
 
 ```sh
 npm install -g @deepseek-ai/dsh@0.2.1-alpha.2
-dsh plugin --profile web add @umialpha/dsh-session-groups@0.1.0
+dsh plugin --profile web add @umialpha/dsh-session-groups@0.1.0 --registry=https://registry.npmjs.org/
 dsh web
 ```
 
-不需要修改 DSH 源码、profile YAML 或 Workspace 配置。请打开本次 `dsh web` 输出的完整 URL；旧端口或缺少认证参数的 URL 可能显示 `dsh web authentication required`。
+不需要修改 DSH 源码、profile YAML 或 Workspace 配置。安装命令显式使用 npm 官方源，避免镜像尚未同步新包时返回 404，不会修改全局 registry 配置。请打开本次 `dsh web` 输出的完整 URL；旧端口或缺少认证参数的 URL 可能显示 `dsh web authentication required`。
 
-如果使用本仓库的未发布版本，请先执行 `pnpm run build` 和安装 smoke；不要只链接 bundle 而遗漏另外三个 workspace 包。
+如果测试本仓库的开发版本，请先执行 `pnpm run build` 和安装 smoke；不要只链接 bundle 而遗漏另外三个 workspace 包。
 
 本地安装 smoke 使用临时 `DSH_HOME` 和四包 tarball，只用于开发验证，不会把插件安装到你的日常 Web profile。
 
@@ -82,7 +82,10 @@ pnpm run lint
 pnpm run build
 pnpm exec vitest run packages/client/ui-session-groups/tests
 node tests/install/session-groups.smoke.mjs --dsh-cli /absolute/path/to/dsh
+node tests/install/session-groups.smoke.mjs --public --dsh-cli /absolute/path/to/dsh
 ```
+
+`--public` 使用公共 npm 中的四包，不构建、不打包、不添加本地 overrides；测试隔离 npm/pnpm 认证配置，仅操作临时 `DSH_HOME`。官方 CLI 版本也必须为 `0.2.1-alpha.2`。
 
 当前完整实现任务与验证记录见 [T-002](tickets/T-002-complete-session-groups.html)。历史设计与评审材料可从 Git 历史查阅。
 
@@ -90,7 +93,7 @@ node tests/install/session-groups.smoke.mjs --dsh-cli /absolute/path/to/dsh
 
 作者：[`umialpha`](https://github.com/umialpha) · [roy236977634@gmail.com](mailto:roy236977634@gmail.com)。问题和建议请提交到 [GitHub Issues](https://github.com/umialpha/dsh-session-groups/issues)。
 
-社区源码预览已发布到官方 [Show Your Plugins!](https://github.com/deepseek-ai/deepseek-harness/discussions/9426)，原文见 [community-post.md](docs/community-post.md)。[1024 社区目录投稿 PR](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/591)已通过静态审核并合并；npm 尚未发布，按目录规则以仅浏览方式收录，不提供安装命令。
+社区预览已发布到官方 [Show Your Plugins!](https://github.com/deepseek-ai/deepseek-harness/discussions/9426)，原文见 [community-post.md](docs/community-post.md)。[1024 社区目录投稿 PR](https://github.com/imsai-sh/awesome-deepseek-harness-plugins/pull/591)已通过静态审核并合并；npm 发布已完成，目录网站的安装入口同步尚未核实。
 
 ## 许可证
 
